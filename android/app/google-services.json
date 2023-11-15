@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "692884162221",
+    "project_id": "event-ease-a5ae8",
+    "storage_bucket": "event-ease-a5ae8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:692884162221:android:db230bdb881bd29f00a824",
+        "android_client_info": {
+          "package_name": "com.example.event_ease"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB1bw-jQqehnlnsWlbv2lr6Hybapex2xfo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
