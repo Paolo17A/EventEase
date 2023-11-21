@@ -136,3 +136,48 @@ Widget labelledTextField(BuildContext context,
         ])),
   );
 }
+
+Widget portfolioField(BuildContext context,
+    {required TextEditingController controller}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 20),
+    child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          comicNeueText(
+              label: 'Portfolio:',
+              color: CustomColors.midnightExtress,
+              fontWeight: FontWeight.bold,
+              fontSize: 20),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.65,
+            height: 40,
+            child: EventEaseTextField(
+                text: '',
+                controller: controller,
+                textInputType: TextInputType.url),
+          )
+        ])),
+  );
+}
+
+Widget multiLineField(BuildContext context,
+    {required TextEditingController controller}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 20),
+    child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        child: Column(children: [
+          comicNeueText(
+              label: 'Feeback:',
+              color: CustomColors.midnightExtress,
+              fontWeight: FontWeight.bold,
+              fontSize: 20),
+          EventEaseTextField(
+              text: '',
+              controller: controller,
+              textInputType: TextInputType.multiline)
+        ])),
+  );
+}

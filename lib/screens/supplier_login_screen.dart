@@ -25,7 +25,7 @@ class _SupplierLoginScreenState extends State<SupplierLoginScreen> {
     emailController.dispose();
   }
 
-  void loginClient() async {
+  void loginSupplier() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
@@ -79,8 +79,11 @@ class _SupplierLoginScreenState extends State<SupplierLoginScreen> {
                     emailAddress(context, controller: emailController),
                     password(context, controller: passwordController),
                     forgotPassword(onPress: () {}),
-                    submitButton(context, label: 'SIGN IN', onPress: () {}),
-                    dontHaveAccount(onPress: () {}),
+                    submitButton(context,
+                        label: 'SIGN IN', onPress: () => loginSupplier()),
+                    dontHaveAccount(
+                        onPress: () => Navigator.of(context)
+                            .pushNamed(NavigatorRoutes.supplierRegister)),
                   ],
                 )),
               ),
