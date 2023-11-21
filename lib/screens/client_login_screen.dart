@@ -43,8 +43,10 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
         return;
       }
       bool hasPaidMembership = userData['hasPaidMembership'];
-
-      if (hasPaidMembership) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (!hasPaidMembership) {
         navigator.pushNamed(NavigatorRoutes.clientHome);
       } else {
         navigator.pushNamed(NavigatorRoutes.settleMembershipFee);

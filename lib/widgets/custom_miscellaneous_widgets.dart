@@ -181,3 +181,36 @@ Widget multiLineField(BuildContext context,
         ])),
   );
 }
+
+Widget buildProfileImageWidget(
+    {required String profileImageURL, double radius = 40}) {
+  return Column(children: [
+    profileImageURL.isNotEmpty
+        ? CircleAvatar(
+            radius: radius, backgroundImage: NetworkImage(profileImageURL))
+        : CircleAvatar(
+            radius: radius,
+            backgroundColor: Colors.white,
+            child: Icon(
+              Icons.person,
+              size: radius * 1.5,
+              color: CustomColors.midnightExtress,
+            )),
+  ]);
+}
+
+Widget myAccountHeader(BuildContext context) {
+  return Container(
+    width: double.infinity,
+    height: MediaQuery.of(context).size.height * 0.1,
+    color: CustomColors.midnightExtress,
+    child: Center(
+      child: comicNeueText(
+          label: 'My Account',
+          color: CustomColors.sweetCorn,
+          textAlign: TextAlign.center,
+          fontSize: 30,
+          fontWeight: FontWeight.bold),
+    ),
+  );
+}

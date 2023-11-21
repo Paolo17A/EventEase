@@ -33,7 +33,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
   final _lastNameController = TextEditingController();
 
   String _selectedService = '';
-  File? _imageFile;
+  File? _profileImageFile;
   late ImagePicker imagePicker;
   final _businessNameController = TextEditingController();
   final _portfolioController = TextEditingController();
@@ -57,6 +57,9 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .set({
         'hasPaidMembership': false,
+        'proofOfPayment': '',
+        'isPremiumSupplier': false,
+        'proofOfPremiumPayments': [],
         'userType': 'SUPPLIER',
         'offeredService': _selectedService,
         'portfolioLink': '',
@@ -79,7 +82,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
     }
   }
 
-  void handleNextButton() {
+  void handleNextButton() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     if (currentRegisterState == RegisterStates.registration) {
       if (_emailController.text.isEmpty ||
@@ -108,6 +111,15 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                 (Text('The password must be at least six characters long.'))));
         return;
       }
+      final sameEmail = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: _emailController.text.trim())
+          .get();
+      if (sameEmail.docs.isNotEmpty) {
+        scaffoldMessenger.showSnackBar(
+            const SnackBar(content: Text('This email is already in use.')));
+        return;
+      }
       setState(() {
         currentRegisterState = RegisterStates.service;
       });
@@ -125,7 +137,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _profileImageFile = File(pickedFile.path);
       });
     }
   }
@@ -268,8 +280,9 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
 
   Widget _buildProfileImageWidget() {
     return Column(children: [
-      _imageFile != null
-          ? CircleAvatar(radius: 70, backgroundImage: FileImage(_imageFile!))
+      _profileImageFile != null
+          ? CircleAvatar(
+              radius: 70, backgroundImage: FileImage(_profileImageFile!))
           : const CircleAvatar(
               radius: 70,
               backgroundColor: CustomColors.midnightExtress,
@@ -278,11 +291,11 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                 size: 100,
                 color: Colors.white,
               )),
-      _imageFile != null
+      _profileImageFile != null
           ? ElevatedButton(
               onPressed: () {
                 setState(() {
-                  _imageFile == null;
+                  _profileImageFile == null;
                 });
               },
               child:
