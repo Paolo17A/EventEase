@@ -1,10 +1,15 @@
 import 'package:event_ease/firebase_options.dart';
+import 'package:event_ease/screens/admin_home_screen.dart';
 import 'package:event_ease/screens/client_home_screen.dart';
 import 'package:event_ease/screens/client_login_screen.dart';
+import 'package:event_ease/screens/client_profile_screen.dart';
 import 'package:event_ease/screens/client_register_screen.dart';
+import 'package:event_ease/screens/forgot_password_screen.dart';
+import 'package:event_ease/screens/services_offered_screen.dart';
 import 'package:event_ease/screens/settle_membership_fee_screen.dart';
 import 'package:event_ease/screens/supplier_home_screen.dart';
 import 'package:event_ease/screens/supplier_login_screen.dart';
+import 'package:event_ease/screens/supplier_profile_screen.dart';
 import 'package:event_ease/screens/supplier_register_screen.dart';
 import 'package:event_ease/screens/welcome_screen.dart';
 import 'package:event_ease/utils/navigator_util.dart';
@@ -29,10 +34,15 @@ final Map<String, WidgetBuilder> _routes = {
   NavigatorRoutes.supplierLogin: (context) => const SupplierLoginScreen(),
   NavigatorRoutes.clientRegister: (context) => const ClientRegisterScreen(),
   NavigatorRoutes.supplierRegister: (context) => const SupplierRegisterScreen(),
+  NavigatorRoutes.forgotPassword: (context) => ForgotPasswordScreen(),
   NavigatorRoutes.settleMembershipFee: (context) =>
       const SettleMembershipFeeScreen(),
   NavigatorRoutes.clientHome: (context) => const ClientHomeScreen(),
-  NavigatorRoutes.supplierHome: (context) => const SupplierHomeScreen()
+  NavigatorRoutes.supplierHome: (context) => const SupplierHomeScreen(),
+  NavigatorRoutes.adminHome: (context) => const AdminHomeScreen(),
+  NavigatorRoutes.clientProfile: (context) => const ClientProfileScreen(),
+  NavigatorRoutes.supplierProfile: (context) => const SupplierProfileScreen(),
+  NavigatorRoutes.servicesOffered: (context) => const ServicesOfferedScreen()
 };
 
 final ThemeData _themeData = ThemeData(

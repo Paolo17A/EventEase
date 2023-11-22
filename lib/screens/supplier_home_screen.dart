@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../utils/custom_containers_widget.dart';
 import '../utils/firebase_util.dart';
+import '../utils/log_out_util.dart';
 import '../widgets/app_bottom_navbar_widget.dart';
 import '../widgets/custom_button_widgets.dart';
 import '../widgets/custom_miscellaneous_widgets.dart';
@@ -48,23 +49,28 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
   //============================================================================
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: profileAppBar(context,
-            profileImageURL: profileImageURL,
-            formattedName: formattedName,
-            onTap: () {}),
-        bottomNavigationBar: bottomNavigationBar(context, 0, false),
-        body: switchedLoadingContainer(
-            _isLoading,
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  myAccountHeader(context),
-                  const Gap(50),
-                  _actionButtons()
-                ],
-              ),
-            )));
+    return WillPopScope(
+      onWillPop: () async {
+        showLogOutModal(context);
+        return false;
+      },
+      child: Scaffold(
+          appBar: profileAppBar(context,
+              profileImageURL: profileImageURL, formattedName: formattedName),
+          bottomNavigationBar:
+              bottomNavigationBar(context, index: 0, isClient: false),
+          body: switchedLoadingContainer(
+              _isLoading,
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    myAccountHeader(context),
+                    const Gap(50),
+                    _actionButtons()
+                  ],
+                ),
+              ))),
+    );
   }
 
   //  COMPONENT WIDGETS

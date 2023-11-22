@@ -6,6 +6,7 @@ import 'package:event_ease/widgets/profile_app_bar_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
+import '../utils/log_out_util.dart';
 import '../widgets/custom_miscellaneous_widgets.dart';
 
 class ClientHomeScreen extends StatefulWidget {
@@ -19,6 +20,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   bool _isLoading = true;
   String profileImageURL = '';
   String formattedName = '';
+  bool hasCurrentEvent = false;
 
   @override
   void didChangeDependencies() {
@@ -32,6 +34,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       final userData = await getCurrentUserData();
       profileImageURL = userData['profileImageURL'];
       formattedName = '${userData['firstName']} ${userData['lastName']}';
+      hasCurrentEvent = userData['currentEventID'].toString().isNotEmpty;
       setState(() {
         _isLoading = false;
       });
@@ -48,23 +51,31 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   //============================================================================
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: profileAppBar(context,
-            profileImageURL: profileImageURL,
-            formattedName: formattedName,
-            onTap: () {}),
-        bottomNavigationBar: bottomNavigationBar(context, 0, true),
-        body: switchedLoadingContainer(
-            _isLoading,
-            SingleChildScrollView(
-              child: Column(
-                children: [
-                  myAccountHeader(context),
-                  const Gap(50),
-                  _actionButtons()
-                ],
-              ),
-            )));
+    return WillPopScope(
+      onWillPop: () async {
+        showLogOutModal(context);
+        return false;
+      },
+      child: Scaffold(
+          appBar: profileAppBar(context,
+              profileImageURL: profileImageURL, formattedName: formattedName),
+          bottomNavigationBar: bottomNavigationBar(context,
+              index: 0,
+              isClient: true,
+              isHomeScreen: true,
+              hasEvent: hasCurrentEvent),
+          body: switchedLoadingContainer(
+              _isLoading,
+              SingleChildScrollView(
+                child: Column(
+                  children: [
+                    myAccountHeader(context),
+                    const Gap(50),
+                    _actionButtons()
+                  ],
+                ),
+              ))),
+    );
   }
 
   //  COMPONENT WIDGETS

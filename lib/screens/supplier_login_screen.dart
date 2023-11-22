@@ -28,6 +28,11 @@ class _SupplierLoginScreenState extends State<SupplierLoginScreen> {
   void loginSupplier() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Please fill up all provided fields.')));
+      return;
+    }
     try {
       setState(() {
         _isLoading = true;
@@ -40,10 +45,15 @@ class _SupplierLoginScreenState extends State<SupplierLoginScreen> {
       if (userData['userType'] != 'SUPPLIER') {
         scaffoldMessenger.showSnackBar(const SnackBar(
             content: Text('This log-in is for suppliers only.')));
+        setState(() {
+          _isLoading = false;
+        });
         return;
       }
       bool hasPaidMembership = userData['hasPaidMembership'];
-
+      setState(() {
+        _isLoading = false;
+      });
       if (hasPaidMembership) {
         navigator.pushNamed(NavigatorRoutes.supplierHome);
       } else {
@@ -78,7 +88,9 @@ class _SupplierLoginScreenState extends State<SupplierLoginScreen> {
                         label: 'Sign in to your supplier account'),
                     emailAddress(context, controller: emailController),
                     password(context, controller: passwordController),
-                    forgotPassword(onPress: () {}),
+                    forgotPassword(
+                        onPress: () => Navigator.of(context)
+                            .pushNamed(NavigatorRoutes.forgotPassword)),
                     submitButton(context,
                         label: 'SIGN IN', onPress: () => loginSupplier()),
                     dontHaveAccount(

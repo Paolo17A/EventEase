@@ -1,3 +1,4 @@
+import 'package:event_ease/widgets/custom_padding_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -137,43 +138,19 @@ Widget labelledTextField(BuildContext context,
   );
 }
 
-Widget portfolioField(BuildContext context,
-    {required TextEditingController controller}) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 20),
-    child: SizedBox(
-        width: MediaQuery.of(context).size.width * 0.9,
-        child:
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          comicNeueText(
-              label: 'Portfolio:',
-              color: CustomColors.midnightExtress,
-              fontWeight: FontWeight.bold,
-              fontSize: 20),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.65,
-            height: 40,
-            child: EventEaseTextField(
-                text: '',
-                controller: controller,
-                textInputType: TextInputType.url),
-          )
-        ])),
-  );
-}
-
 Widget multiLineField(BuildContext context,
-    {required TextEditingController controller}) {
+    {required String label, required TextEditingController controller}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 20),
     child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.9,
-        child: Column(children: [
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           comicNeueText(
-              label: 'Feeback:',
+              label: label,
               color: CustomColors.midnightExtress,
               fontWeight: FontWeight.bold,
               fontSize: 20),
+          Gap(5),
           EventEaseTextField(
               text: '',
               controller: controller,
@@ -203,14 +180,43 @@ Widget myAccountHeader(BuildContext context) {
   return Container(
     width: double.infinity,
     height: MediaQuery.of(context).size.height * 0.1,
-    color: CustomColors.midnightExtress,
-    child: Center(
-      child: comicNeueText(
-          label: 'My Account',
-          color: CustomColors.sweetCorn,
-          textAlign: TextAlign.center,
-          fontSize: 30,
-          fontWeight: FontWeight.bold),
-    ),
+    color: Colors.white,
+    child: Row(children: [
+      all20Pix(
+          child: comicNeueText(
+              label: 'My Account',
+              color: CustomColors.midnightExtress,
+              textAlign: TextAlign.center,
+              fontSize: 30,
+              fontWeight: FontWeight.bold))
+    ]),
+  );
+}
+
+Widget numericalTextField(BuildContext context,
+    {required String label,
+    required TextEditingController controller,
+    required bool hasDecimals}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          comicNeueText(
+              label: label,
+              color: CustomColors.midnightExtress,
+              fontWeight: FontWeight.bold,
+              fontSize: 20),
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.65,
+            height: 40,
+            child: EventEaseTextField(
+                text: '',
+                controller: controller,
+                textInputType: TextInputType.numberWithOptions(
+                    signed: false, decimal: hasDecimals)),
+          )
+        ])),
   );
 }

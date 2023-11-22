@@ -40,16 +40,30 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
       if (userData['userType'] != 'CLIENT') {
         scaffoldMessenger.showSnackBar(
             const SnackBar(content: Text('This log-in is for clients only.')));
+        await FirebaseAuth.instance.signOut();
+
         return;
       }
       bool hasPaidMembership = userData['hasPaidMembership'];
+      String proofOfPayment = userData['proofOfPayment'];
       setState(() {
         _isLoading = false;
       });
-      if (!hasPaidMembership) {
+      if (hasPaidMembership) {
         navigator.pushNamed(NavigatorRoutes.clientHome);
       } else {
-        navigator.pushNamed(NavigatorRoutes.settleMembershipFee);
+        if (proofOfPayment.isNotEmpty) {
+          await FirebaseAuth.instance.signOut();
+          scaffoldMessenger.showSnackBar(SnackBar(
+              content: Text(
+                  'Your payment has not yet been verified by the admin.')));
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        } else {
+          navigator.pushNamed(NavigatorRoutes.settleMembershipFee);
+        }
       }
     } catch (error) {
       scaffoldMessenger.showSnackBar(
@@ -79,7 +93,9 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
                     loginHeaderWidgets(label: 'Sign in to your client account'),
                     emailAddress(context, controller: emailController),
                     password(context, controller: passwordController),
-                    forgotPassword(onPress: () {}),
+                    forgotPassword(
+                        onPress: () => Navigator.of(context)
+                            .pushNamed(NavigatorRoutes.forgotPassword)),
                     submitButton(context,
                         label: 'SIGN IN', onPress: () => loginClient()),
                     dontHaveAccount(

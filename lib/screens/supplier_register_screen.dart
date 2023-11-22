@@ -7,9 +7,12 @@ import 'package:event_ease/utils/navigator_util.dart';
 import 'package:event_ease/widgets/custom_padding_widgets.dart';
 import 'package:event_ease/widgets/custom_styling_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
+import '../utils/custom_string_util.dart';
+import '../widgets/custom_button_widgets.dart';
 import '../widgets/custom_miscellaneous_widgets.dart';
 
 class SupplierRegisterScreen extends StatefulWidget {
@@ -33,11 +36,14 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
   final _lastNameController = TextEditingController();
 
   String _selectedService = '';
+
   File? _profileImageFile;
-  late ImagePicker imagePicker;
   final _businessNameController = TextEditingController();
-  final _portfolioController = TextEditingController();
-  final _feebackController = TextEditingController();
+  final List<File?> _portfolioImageFiles = [];
+  ImagePicker imagePicker = ImagePicker();
+  final _introductionController = TextEditingController();
+  final _fixedRateController = TextEditingController();
+  final _maxCapacityController = TextEditingController();
 
   void registerNewUser() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
@@ -62,20 +68,59 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
         'proofOfPremiumPayments': [],
         'userType': 'SUPPLIER',
         'offeredService': _selectedService,
-        'portfolioLink': '',
+        'portfolio': [],
         'email': _emailController.text,
         'password': _passwordController.text,
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
+        'currentClients': [],
         'currentEvents': [],
         'businessName': _businessNameController.text,
-        'profileImageURL': ''
+        'feedback': [],
+        'profileImageURL': '',
+        'introduction': _introductionController.text,
+        'fixedRate': double.parse(_fixedRateController.text),
+        'maxCapacity': int.parse(_maxCapacityController.text)
       });
 
+      //  Handle Portfolio Entries
+      List<Map<String, String>> portfolioEntries = [];
+      for (var portfolioImage in _portfolioImageFiles) {
+        String hex = '${generateRandomHexString(6)}.png';
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('portfolios')
+            .child(FirebaseAuth.instance.currentUser!.uid)
+            .child(hex);
+        final uploadTask = storageRef.putFile(portfolioImage!);
+        final taskSnapshot = await uploadTask.whenComplete(() {});
+        final String downloadURL = await taskSnapshot.ref.getDownloadURL();
+        portfolioEntries.add({'name': hex, 'imageURL': downloadURL});
+      }
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({'portfolio': portfolioEntries});
+
+      //  Handle Profile Image
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profilePics')
+          .child(FirebaseAuth.instance.currentUser!.uid);
+      final uploadTask = storageRef.putFile(_profileImageFile!);
+      final taskSnapshot = await uploadTask.whenComplete(() {});
+      final String downloadURL = await taskSnapshot.ref.getDownloadURL();
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({'profileImageURL': downloadURL});
+      setState(() {
+        _isLoading = false;
+      });
       navigator.pushReplacementNamed(NavigatorRoutes.supplierLogin);
     } catch (error) {
       scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Error registering new user: $error')));
+          SnackBar(content: Text('Error registering new supplier: $error')));
       setState(() {
         _isLoading = false;
       });
@@ -111,6 +156,9 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                 (Text('The password must be at least six characters long.'))));
         return;
       }
+      setState(() {
+        _isLoading = true;
+      });
       final sameEmail = await FirebaseFirestore.instance
           .collection('users')
           .where('email', isEqualTo: _emailController.text.trim())
@@ -118,9 +166,13 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
       if (sameEmail.docs.isNotEmpty) {
         scaffoldMessenger.showSnackBar(
             const SnackBar(content: Text('This email is already in use.')));
+        setState(() {
+          _isLoading = false;
+        });
         return;
       }
       setState(() {
+        _isLoading = false;
         currentRegisterState = RegisterStates.service;
       });
     } else if (currentRegisterState == RegisterStates.service) {
@@ -128,18 +180,70 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
         currentRegisterState = RegisterStates.profile;
       });
     } else if (currentRegisterState == RegisterStates.profile) {
+      if (_businessNameController.text.isEmpty) {
+        scaffoldMessenger.showSnackBar(
+            const SnackBar(content: Text('Please provide a business name.')));
+        return;
+      }
+      if (_profileImageFile == null) {
+        scaffoldMessenger.showSnackBar(
+            const SnackBar(content: Text('Please upload a profile image.')));
+        return;
+      }
+      if (_portfolioImageFiles.isEmpty) {
+        scaffoldMessenger.showSnackBar(const SnackBar(
+            content: Text('Please upload at least one portfolio image.')));
+        return;
+      }
+      if (_introductionController.text.isEmpty) {
+        scaffoldMessenger.showSnackBar(const SnackBar(
+            content:
+                Text('Please provide and introduction to your business.')));
+        return;
+      }
+
+      if (double.tryParse(_fixedRateController.text) == null ||
+          double.parse(_fixedRateController.text) <= 0) {
+        scaffoldMessenger.showSnackBar(const SnackBar(
+            content:
+                Text('Please input a valid amount for your fixed price.')));
+        return;
+      }
+      if (int.tryParse(_maxCapacityController.text) == null ||
+          int.parse(_maxCapacityController.text) <= 0) {
+        scaffoldMessenger.showSnackBar(const SnackBar(
+            content: Text(
+                'Please input a valid count for your max guest capacity.')));
+        return;
+      }
       registerNewUser();
     }
   }
 
   Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile = await imagePicker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _profileImageFile = File(pickedFile.path);
       });
     }
+  }
+
+  Future _pickPortfolioImages() async {
+    final pickedFiles = await imagePicker.pickMultiImage();
+    if (pickedFiles.isNotEmpty) {
+      setState(() {
+        for (var file in pickedFiles) {
+          _portfolioImageFiles.add(File(file.path));
+        }
+      });
+    }
+  }
+
+  void _removePortfolioImage(int index) {
+    setState(() {
+      _portfolioImageFiles.removeAt(index);
+    });
   }
 
   @override
@@ -217,12 +321,42 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
           padding: const EdgeInsets.all(5),
           child: Column(
             children: [
-              _serviceButton('CATERING'),
-              _serviceButton('COSMETOLOGIST'),
-              _serviceButton('GUEST\'S PLACE'),
-              _serviceButton('HOST'),
-              _serviceButton('LIGHT AND SOUND TECHNICIAN'),
-              _serviceButton('PHOTOGRAPHER AND VIDEOGRAPHER')
+              serviceButton(
+                  'CATERING',
+                  () => setState(() {
+                        _selectedService = 'CATERING';
+                        handleNextButton();
+                      })),
+              serviceButton(
+                  'COSMETOLOGIST',
+                  () => setState(() {
+                        _selectedService = 'COSMETOLOGIST';
+                        handleNextButton();
+                      })),
+              serviceButton(
+                  'GUEST\'S PLACE',
+                  () => setState(() {
+                        _selectedService = 'GUEST\'S PLACE';
+                        handleNextButton();
+                      })),
+              serviceButton(
+                  'HOST',
+                  () => setState(() {
+                        _selectedService = 'HOST';
+                        handleNextButton();
+                      })),
+              serviceButton(
+                  'LIGHT AND SOUND TECHNICIAN',
+                  () => setState(() {
+                        _selectedService = 'LIGHT AND SOUND TECHNICIAN';
+                        handleNextButton();
+                      })),
+              serviceButton(
+                  'PHOTOGRAPHER AND VIDEOGRAPHER',
+                  () => setState(() {
+                        _selectedService = 'PHOTOGRAPHER AND VIDEOGRAPHER';
+                        handleNextButton();
+                      }))
             ],
           ),
         ),
@@ -246,36 +380,30 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
               fontWeight: FontWeight.bold),
         ),
       ),
+      _selectedServiceWidget(),
       _buildProfileImageWidget(),
       labelledTextField(context,
           label: 'Business\nName:', controller: _businessNameController),
-      portfolioField(context, controller: _portfolioController),
-      multiLineField(context, controller: _feebackController)
+      _portfolioSelection(),
+      multiLineField(context,
+          label: 'Introduction:', controller: _introductionController),
+      numericalTextField(context,
+          label: 'Fixed Rate',
+          controller: _fixedRateController,
+          hasDecimals: true),
+      numericalTextField(context,
+          label: 'Max Guest\nCapacity:',
+          controller: _maxCapacityController,
+          hasDecimals: false),
+      submitButton(context,
+          label: 'FINISH REGISTRATION', onPress: handleNextButton)
     ]);
   }
 
-  Widget _serviceButton(String label) {
-    return vertical10Pix(
-      child: SizedBox(
-        width: double.maxFinite,
-        height: 80,
-        child: ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _selectedService = label;
-                handleNextButton();
-              });
-            },
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                side: const BorderSide(
-                    color: CustomColors.midnightExtress, width: 2)),
-            child: comicNeueText(
-                label: '* $label',
-                color: CustomColors.midnightExtress,
-                fontWeight: FontWeight.w900)),
-      ),
-    );
+  Widget _selectedServiceWidget() {
+    return all20Pix(
+        child: comicNeueText(
+            label: 'Applying as:\n$_selectedService', fontSize: 20));
   }
 
   Widget _buildProfileImageWidget() {
@@ -293,17 +421,68 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
               )),
       _profileImageFile != null
           ? ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  _profileImageFile == null;
-                });
-              },
-              child:
-                  Text('Remove Selected Image', style: buttonSweetCornStyle()))
+              onPressed: () => setState(() {
+                    _profileImageFile == null;
+                  }),
+              child: Text('Remove Selected Image',
+                  textAlign: TextAlign.center, style: buttonSweetCornStyle()))
           : ElevatedButton(
               onPressed: _pickImage,
-              child:
-                  Text('Select Business Image', style: buttonSweetCornStyle()))
+              child: Text('Select Profile Image',
+                  textAlign: TextAlign.center, style: buttonSweetCornStyle()))
+    ]);
+  }
+
+  Widget _portfolioSelection() {
+    return all20Pix(
+      child: Column(children: [
+        Row(children: [
+          comicNeueText(
+              label: 'Portfolio:',
+              color: CustomColors.midnightExtress,
+              fontWeight: FontWeight.bold,
+              fontSize: 28)
+        ]),
+        if (_portfolioImageFiles.isNotEmpty)
+          SizedBox(
+            width: MediaQuery.of(context).size.width * 0.85,
+            height: 250,
+            child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: true,
+                itemCount: _portfolioImageFiles.length,
+                itemBuilder: (context, index) => _portfolioImageWidget(index)),
+          ),
+        ElevatedButton(
+            onPressed: _pickPortfolioImages,
+            child: Text('Select Images', style: buttonSweetCornStyle()))
+      ]),
+    );
+  }
+
+  Widget _portfolioImageWidget(int index) {
+    return Column(children: [
+      GestureDetector(
+          onTap: () {
+            showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                      content: Image.file(_portfolioImageFiles[index]!),
+                    ));
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Container(
+              width: 150,
+              height: 150,
+              decoration:
+                  BoxDecoration(border: Border.all(), color: Colors.black),
+              child: Image.file(_portfolioImageFiles[index]!),
+            ),
+          )),
+      ElevatedButton(
+          onPressed: () => _removePortfolioImage(index),
+          child: const Icon(Icons.delete, color: Colors.white))
     ]);
   }
 }

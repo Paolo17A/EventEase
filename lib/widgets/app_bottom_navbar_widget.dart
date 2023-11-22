@@ -1,31 +1,48 @@
 import 'package:event_ease/utils/colors_util.dart';
+import 'package:event_ease/utils/navigator_util.dart';
 import 'package:event_ease/widgets/custom_styling_widgets.dart';
 import 'package:flutter/material.dart';
 
 Color bottomNavButtonColor = CustomColors.midnightExtress;
 
-void _processPress(int selectedIndex, int currentIndex, BuildContext context) {
+void _processPress(BuildContext context, selectedIndex, int currentIndex,
+    bool isClient, bool hasEvent, bool isHomeScreen) {
   //  Do nothing if we are selecting the same bottom bar
-  if (selectedIndex == currentIndex) {
+  if (!isHomeScreen && selectedIndex == currentIndex) {
     return;
   }
   switch (selectedIndex) {
     case 0:
-      Navigator.pushNamed(context, '/assessment');
+      //  Current user is client
+      if (isClient) {
+        if (hasEvent) {
+          print('has event');
+          //Navigator.of(context).pushNamed(routeName);
+        } else {
+          print('no event');
+          Navigator.of(context).pushNamed(NavigatorRoutes.servicesOffered);
+        }
+      }
+      //  Current user is supplier
+      else {}
       break;
     case 1:
-      Navigator.popUntil(context, ModalRoute.withName('/home'));
       break;
     case 2:
-      Navigator.pushNamed(context, '/organization');
-      break;
-    case 3:
-      Navigator.pushNamed(context, '/profile');
+      Navigator.pushNamed(
+          context,
+          isClient
+              ? NavigatorRoutes.clientProfile
+              : NavigatorRoutes.supplierProfile);
       break;
   }
 }
 
-Widget bottomNavigationBar(BuildContext context, int index, bool isClient) {
+Widget bottomNavigationBar(BuildContext context,
+    {required int index,
+    required bool isClient,
+    bool isHomeScreen = false,
+    bool hasEvent = false}) {
   return BottomNavigationBar(
     currentIndex: index,
     selectedFontSize: 0,
@@ -46,7 +63,8 @@ Widget bottomNavigationBar(BuildContext context, int index, bool isClient) {
           label: 'My Account'),
     ],
     onTap: (int tappedIndex) {
-      //_processPress(tappedIndex, index, context);
+      _processPress(
+          context, tappedIndex, index, isClient, hasEvent, isHomeScreen);
     },
   );
 }

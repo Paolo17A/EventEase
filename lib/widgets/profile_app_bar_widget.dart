@@ -6,23 +6,28 @@ import '../utils/colors_util.dart';
 import 'custom_miscellaneous_widgets.dart';
 
 PreferredSizeWidget profileAppBar(BuildContext context,
-    {required String profileImageURL,
-    required String formattedName,
-    required Function onTap}) {
+    {required String profileImageURL, required String formattedName}) {
   return AppBar(
       automaticallyImplyLeading: false,
       backgroundColor: CustomColors.midnightExtress,
       toolbarHeight: MediaQuery.of(context).size.height * 0.1,
-      title: GestureDetector(
-        onTap: () => onTap(),
-        child: Row(children: [
-          buildProfileImageWidget(profileImageURL: profileImageURL, radius: 30),
-          const Gap(20),
-          comicNeueText(
-              label: formattedName,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 25)
-        ]),
-      ));
+      title: Row(children: [
+        buildProfileImageWidget(profileImageURL: profileImageURL, radius: 30),
+        const Gap(20),
+        comicNeueText(
+            label: formattedName,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 25)
+      ]));
+}
+
+PreferredSizeWidget emptyWhiteAppBar(BuildContext context) {
+  return AppBar(
+    backgroundColor: Colors.white,
+    elevation: 0,
+    leading: IconButton(
+        onPressed: () => Navigator.of(context).pop(),
+        icon: Icon(Icons.arrow_back, color: CustomColors.midnightExtress)),
+  );
 }
