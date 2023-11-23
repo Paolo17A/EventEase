@@ -26,6 +26,7 @@ class _SupplierLoginScreenState extends State<SupplierLoginScreen> {
   }
 
   void loginSupplier() async {
+    FocusScope.of(context).unfocus();
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
@@ -43,6 +44,13 @@ class _SupplierLoginScreenState extends State<SupplierLoginScreen> {
 
       final userData = await getCurrentUserData();
       if (userData['userType'] != 'SUPPLIER') {
+        if (userData['userType'] == 'ADMIN') {
+          setState(() {
+            _isLoading = false;
+          });
+          Navigator.of(context).pushNamed(NavigatorRoutes.adminHome);
+          return;
+        }
         scaffoldMessenger.showSnackBar(const SnackBar(
             content: Text('This log-in is for suppliers only.')));
         setState(() {
@@ -50,14 +58,29 @@ class _SupplierLoginScreenState extends State<SupplierLoginScreen> {
         });
         return;
       }
-      bool hasPaidMembership = userData['hasPaidMembership'];
-      setState(() {
-        _isLoading = false;
-      });
-      if (hasPaidMembership) {
+      String membershipPayment = userData['membershipPayment'];
+      if (membershipPayment.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        navigator.pushNamed(NavigatorRoutes.settleMembershipFee);
+        return;
+      }
+
+      final transaction = await getThisTransaction(membershipPayment);
+      bool isVerified = transaction['verified'];
+      if (isVerified) {
         navigator.pushNamed(NavigatorRoutes.supplierHome);
       } else {
-        navigator.pushNamed(NavigatorRoutes.settleMembershipFee);
+        await FirebaseAuth.instance.signOut();
+        setState(() {
+          _isLoading = false;
+        });
+        scaffoldMessenger.showSnackBar(SnackBar(
+            content:
+                Text('Your payment has not yet been verified by the admin.')));
+
+        return;
       }
     } catch (error) {
       scaffoldMessenger.showSnackBar(

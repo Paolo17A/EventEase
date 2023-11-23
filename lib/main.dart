@@ -1,10 +1,15 @@
 import 'package:event_ease/firebase_options.dart';
+import 'package:event_ease/screens/add_service_screen.dart';
 import 'package:event_ease/screens/admin_home_screen.dart';
+import 'package:event_ease/screens/avail_premium_screen.dart';
 import 'package:event_ease/screens/client_home_screen.dart';
 import 'package:event_ease/screens/client_login_screen.dart';
 import 'package:event_ease/screens/client_profile_screen.dart';
 import 'package:event_ease/screens/client_register_screen.dart';
+import 'package:event_ease/screens/edit_client_profile_screen.dart';
+import 'package:event_ease/screens/edit_supplier_profile_screen.dart';
 import 'package:event_ease/screens/forgot_password_screen.dart';
+import 'package:event_ease/screens/membership_requests_screen.dart';
 import 'package:event_ease/screens/services_offered_screen.dart';
 import 'package:event_ease/screens/settle_membership_fee_screen.dart';
 import 'package:event_ease/screens/supplier_home_screen.dart';
@@ -30,19 +35,30 @@ void main() async {
 
 final Map<String, WidgetBuilder> _routes = {
   NavigatorRoutes.welcome: (context) => const WelcomeScreen(),
-  NavigatorRoutes.clientLogin: (context) => const ClientLoginScreen(),
-  NavigatorRoutes.supplierLogin: (context) => const SupplierLoginScreen(),
-  NavigatorRoutes.clientRegister: (context) => const ClientRegisterScreen(),
-  NavigatorRoutes.supplierRegister: (context) => const SupplierRegisterScreen(),
   NavigatorRoutes.forgotPassword: (context) => ForgotPasswordScreen(),
   NavigatorRoutes.settleMembershipFee: (context) =>
       const SettleMembershipFeeScreen(),
+  //CLIENT
+  NavigatorRoutes.clientLogin: (context) => const ClientLoginScreen(),
+  NavigatorRoutes.clientRegister: (context) => const ClientRegisterScreen(),
   NavigatorRoutes.clientHome: (context) => const ClientHomeScreen(),
-  NavigatorRoutes.supplierHome: (context) => const SupplierHomeScreen(),
-  NavigatorRoutes.adminHome: (context) => const AdminHomeScreen(),
   NavigatorRoutes.clientProfile: (context) => const ClientProfileScreen(),
+  NavigatorRoutes.servicesOffered: (context) => const ServicesOfferedScreen(),
+  NavigatorRoutes.editClientProfile: (context) => EditClientProfileScreen(),
+  NavigatorRoutes.addService: (context) => const AddServiceScreen(),
+
+  //SUPPLIER
+  NavigatorRoutes.supplierLogin: (context) => const SupplierLoginScreen(),
+  NavigatorRoutes.supplierRegister: (context) => const SupplierRegisterScreen(),
+  NavigatorRoutes.supplierHome: (context) => const SupplierHomeScreen(),
   NavigatorRoutes.supplierProfile: (context) => const SupplierProfileScreen(),
-  NavigatorRoutes.servicesOffered: (context) => const ServicesOfferedScreen()
+  NavigatorRoutes.availPremium: (context) => const AvailPremiumScreen(),
+  NavigatorRoutes.editSupplierProfile: (context) => EditSupplierProfileScreen(),
+
+  //ADMIN
+  NavigatorRoutes.adminHome: (context) => const AdminHomeScreen(),
+  NavigatorRoutes.membershipRequests: (context) =>
+      const MembershipRequestsScreen()
 };
 
 final ThemeData _themeData = ThemeData(

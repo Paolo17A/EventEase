@@ -25,6 +25,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen> {
   final _lastNameController = TextEditingController();
 
   void registerNewUser() async {
+    FocusScope.of(context).unfocus();
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     if (_emailController.text.isEmpty ||
@@ -67,19 +68,17 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen> {
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .set({
-        'hasPaidMembership': false,
-        'proofOfPayment': '',
         'userType': 'CLIENT',
         'email': _emailController.text,
         'password': _passwordController.text,
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
-        'currentSuppliers': [],
-        'paymentHistory': [],
-        'feedback': [],
+        'profileImageURL': '',
         'currentEventID': '',
-        'availedServices': {},
-        'profileImageURL': ''
+        'availedSuppliers': {},
+        'transactionHistory': [],
+        'feedbackHistory': [],
+        'membershipPayment': '',
       });
       await FirebaseAuth.instance.signOut();
       scaffoldMessenger.showSnackBar(const SnackBar(

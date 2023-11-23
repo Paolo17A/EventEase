@@ -1,27 +1,27 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:event_ease/utils/custom_containers_widget.dart';
-import 'package:event_ease/utils/log_out_util.dart';
-import 'package:event_ease/widgets/custom_padding_widgets.dart';
-import 'package:event_ease/widgets/custom_styling_widgets.dart';
+import 'package:event_ease/utils/colors_util.dart';
+import 'package:event_ease/utils/navigator_util.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../utils/custom_containers_widget.dart';
 import '../widgets/custom_miscellaneous_widgets.dart';
+import '../widgets/custom_padding_widgets.dart';
+import '../widgets/custom_styling_widgets.dart';
 
-class SettleMembershipFeeScreen extends StatefulWidget {
-  const SettleMembershipFeeScreen({super.key});
+class AvailPremiumScreen extends StatefulWidget {
+  const AvailPremiumScreen({super.key});
 
   @override
-  State<SettleMembershipFeeScreen> createState() =>
-      _SettleMembershipFeeScreenState();
+  State<AvailPremiumScreen> createState() => _AvailPremiumScreenState();
 }
 
-class _SettleMembershipFeeScreenState extends State<SettleMembershipFeeScreen> {
+class _AvailPremiumScreenState extends State<AvailPremiumScreen> {
   bool _isLoading = false;
   File? _proofOfPayment;
   ImagePicker imagePicker = ImagePicker();
@@ -43,24 +43,25 @@ class _SettleMembershipFeeScreenState extends State<SettleMembershipFeeScreen> {
         _isLoading = true;
       });
       //  Handle Profile Image
+      String transactionID = DateTime.now().millisecondsSinceEpoch.toString();
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('transactions')
-          .child('membership')
-          .child(FirebaseAuth.instance.currentUser!.uid);
+          .child('premium')
+          .child(FirebaseAuth.instance.currentUser!.uid)
+          .child(transactionID);
       final uploadTask = storageRef.putFile(_proofOfPayment!);
       final taskSnapshot = await uploadTask.whenComplete(() {});
       final String downloadURL = await taskSnapshot.ref.getDownloadURL();
 
-      String transactionID = DateTime.now().millisecondsSinceEpoch.toString();
       await FirebaseFirestore.instance
           .collection('transactions')
           .doc(transactionID)
           .set({
-        'transactionType': 'MEMBERSHIP',
+        'transactionType': 'PREMIUM',
         'user': FirebaseAuth.instance.currentUser!.uid,
         'verified': false,
-        'amount': 150.00,
+        'amount': 200.00,
         'proofOfPayment': downloadURL,
         'dateCreated': DateTime.now(),
         'dateSettled': DateTime(1970)
@@ -69,13 +70,14 @@ class _SettleMembershipFeeScreenState extends State<SettleMembershipFeeScreen> {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
-          .update({'membershipPayment': transactionID});
+          .update({'latestPremiumSupplierPayment': transactionID});
       scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Successfully uploaded proof of payment!')));
+          SnackBar(content: Text('Successfully applied for premium service!')));
       setState(() {
         _isLoading = false;
       });
       navigator.pop();
+      navigator.pushReplacementNamed(NavigatorRoutes.supplierProfile);
     } catch (error) {
       scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Error uploading proof of payment.')));
@@ -87,28 +89,23 @@ class _SettleMembershipFeeScreenState extends State<SettleMembershipFeeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        showLogOutModal(context);
-        return false;
-      },
-      child: Scaffold(
-          body: stackedLoadingContainer(
-              context,
-              _isLoading,
-              SingleChildScrollView(
-                child: all20Pix(
-                    child: Column(
-                  children: [
-                    loginHeaderWidgets(
-                        label: 'Please settle the PHP 150.00 membership fee.'),
-                    paymentOptions(),
-                    Gap(20),
-                    _proofOfPaymentWidgets()
-                  ],
-                )),
-              ))),
-    );
+    return Scaffold(
+        body: stackedLoadingContainer(
+            context,
+            _isLoading,
+            SingleChildScrollView(
+              child: all20Pix(
+                  child: Column(
+                children: [
+                  loginHeaderWidgets(
+                      label:
+                          'Please settle the monthly PHP 200.00 premium supplier free.'),
+                  paymentOptions(),
+                  Gap(20),
+                  _proofOfPaymentWidgets()
+                ],
+              )),
+            )));
   }
 
   Widget _proofOfPaymentWidgets() {
@@ -144,19 +141,27 @@ class _SettleMembershipFeeScreenState extends State<SettleMembershipFeeScreen> {
               child: const Icon(Icons.delete, color: Colors.white)),
           Gap(30)
         ]),
-      ElevatedButton(
-          onPressed: () {
-            _proofOfPayment != null ? _uploadProofOfPayment() : _pickImage();
-          },
-          style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30))),
-          child: Text(
-            _proofOfPayment != null
-                ? 'SUBMIT PROOF OF PAYMENT'
-                : 'SELECT PROOF OF PAYMENT',
-            style: buttonSweetCornStyle(),
-          ))
+      SizedBox(
+        width: 200,
+        child: ElevatedButton(
+            onPressed: () {
+              _proofOfPayment != null ? _uploadProofOfPayment() : _pickImage();
+            },
+            style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30))),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: comicNeueText(
+                  label: _proofOfPayment != null
+                      ? 'SUBMIT PREMIUM APPLICATION'
+                      : 'SELECT PROOF OF PAYMENT',
+                  textAlign: TextAlign.center,
+                  color: CustomColors.sweetCorn,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 17),
+            )),
+      )
     ]));
   }
 }

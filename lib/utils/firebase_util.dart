@@ -10,3 +10,17 @@ Future<Map<dynamic, dynamic>> getThisUserData(String userID) async {
       await FirebaseFirestore.instance.collection('users').doc(userID).get();
   return user.data() as Map<dynamic, dynamic>;
 }
+
+Future<Map<dynamic, dynamic>> getThisTransaction(String transactionID) async {
+  final transaction = await FirebaseFirestore.instance
+      .collection('transactions')
+      .doc(transactionID)
+      .get();
+  return transaction.data() as Map<dynamic, dynamic>;
+}
+
+Future<Map<dynamic, dynamic>> getThisEvent(String eventID) async {
+  final transaction =
+      await FirebaseFirestore.instance.collection('events').doc(eventID).get();
+  return transaction.data() as Map<dynamic, dynamic>;
+}

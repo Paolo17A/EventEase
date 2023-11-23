@@ -97,3 +97,19 @@ Widget serviceButton(String label, Function onPress) {
     ),
   );
 }
+
+Widget eventGenerationButton(BuildContext context,
+    {required String label, required Function onPress}) {
+  return SizedBox(
+    width: MediaQuery.of(context).size.width * 0.8,
+    height: MediaQuery.of(context).size.height * 0.2,
+    child: ElevatedButton(
+        onPressed: () => onPress(),
+        child: comicNeueText(
+            label: label,
+            textAlign: TextAlign.center,
+            color: CustomColors.sweetCorn,
+            fontWeight: FontWeight.bold,
+            fontSize: 40)),
+  );
+}

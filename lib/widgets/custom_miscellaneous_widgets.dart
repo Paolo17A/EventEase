@@ -176,7 +176,24 @@ Widget buildProfileImageWidget(
   ]);
 }
 
-Widget myAccountHeader(BuildContext context) {
+Widget midnightBGHeaderText(BuildContext context, {required String label}) {
+  return Container(
+    width: double.infinity,
+    height: MediaQuery.of(context).size.height * 0.1,
+    color: CustomColors.midnightExtress,
+    child: Row(children: [
+      all20Pix(
+          child: comicNeueText(
+              label: label,
+              color: CustomColors.sweetCorn,
+              textAlign: TextAlign.center,
+              fontSize: 30,
+              fontWeight: FontWeight.bold))
+    ]),
+  );
+}
+
+Widget whiteBGHeaderText(BuildContext context, {required String label}) {
   return Container(
     width: double.infinity,
     height: MediaQuery.of(context).size.height * 0.1,
@@ -184,7 +201,7 @@ Widget myAccountHeader(BuildContext context) {
     child: Row(children: [
       all20Pix(
           child: comicNeueText(
-              label: 'My Account',
+              label: label,
               color: CustomColors.midnightExtress,
               textAlign: TextAlign.center,
               fontSize: 30,
@@ -218,5 +235,45 @@ Widget numericalTextField(BuildContext context,
                     signed: false, decimal: hasDecimals)),
           )
         ])),
+  );
+}
+
+Widget paymentOptions() {
+  return Container(
+    width: double.infinity,
+    decoration:
+        BoxDecoration(border: Border.all(color: CustomColors.midnightExtress)),
+    child: all20Pix(
+        child: Column(
+      children: [
+        comicNeueText(
+            label:
+                'You may settle the membership fee via any of the following channels:',
+            fontWeight: FontWeight.bold,
+            fontSize: 20),
+        Gap(20),
+        Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                comicNeueText(
+                    label: 'GCash: 1234567890',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20),
+                comicNeueText(
+                    label: 'PayMaya: 1234567890',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20),
+                comicNeueText(
+                    label: 'BDO: 1234567890',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20),
+              ],
+            ),
+          ],
+        )
+      ],
+    )),
   );
 }

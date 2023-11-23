@@ -69,7 +69,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    myAccountHeader(context),
+                    whiteBGHeaderText(context, label: 'My Account'),
                     const Gap(50),
                     _actionButtons()
                   ],

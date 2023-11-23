@@ -22,10 +22,13 @@ PreferredSizeWidget profileAppBar(BuildContext context,
       ]));
 }
 
-PreferredSizeWidget emptyWhiteAppBar(BuildContext context) {
+PreferredSizeWidget emptyWhiteAppBar(BuildContext context, {String? label}) {
   return AppBar(
     backgroundColor: Colors.white,
     elevation: 0,
+    title: label != null
+        ? comicNeueText(label: label, color: CustomColors.midnightExtress)
+        : null,
     leading: IconButton(
         onPressed: () => Navigator.of(context).pop(),
         icon: Icon(Icons.arrow_back, color: CustomColors.midnightExtress)),

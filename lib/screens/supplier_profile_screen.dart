@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_ease/utils/custom_containers_widget.dart';
+import 'package:event_ease/utils/navigator_util.dart';
 import 'package:event_ease/widgets/custom_miscellaneous_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 import '../utils/colors_util.dart';
 import '../utils/firebase_util.dart';
@@ -25,6 +28,9 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
   String _introduction = '';
   double _fixedRate = 0.0;
   int _maxCapacity = 0;
+  bool _isPremiumSupplier = false;
+  DateTime _premiumSupplierExpirationDate = DateTime(1970);
+  String latestPremiumSupplierPayment = '';
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -42,6 +48,10 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
       _introduction = userData['introduction'];
       _fixedRate = userData['fixedRate'];
       _maxCapacity = userData['maxCapacity'];
+      _isPremiumSupplier = userData['isPremiumSupplier'];
+      _premiumSupplierExpirationDate =
+          (userData['premiumSupplierExpirationDate'] as Timestamp).toDate();
+      latestPremiumSupplierPayment = userData['latestPremiumSupplierPayment'];
       setState(() {
         _isLoading = false;
       });
@@ -56,39 +66,56 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon:
-                  Icon(Icons.arrow_back, color: CustomColors.midnightExtress)),
-          actions: [IconButton(onPressed: () {}, icon: Icon(Icons.edit))],
-        ),
-        bottomNavigationBar:
-            bottomNavigationBar(context, index: 2, isClient: false),
-        body: switchedLoadingContainer(
-          _isLoading,
-          SafeArea(
-              child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _profileWidgets(),
-                submitButton(context, label: 'LOG-OUT', onPress: () async {
-                  await FirebaseAuth.instance.signOut();
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                })
-              ],
-            ),
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).pop();
+        Navigator.of(context)
+            .pushReplacementNamed(NavigatorRoutes.supplierHome);
+        return false;
+      },
+      child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context)
+                      .pushReplacementNamed(NavigatorRoutes.supplierHome);
+                },
+                icon: Icon(Icons.arrow_back,
+                    color: CustomColors.midnightExtress)),
+            actions: [
+              IconButton(
+                  onPressed: () => Navigator.of(context)
+                      .pushNamed(NavigatorRoutes.editSupplierProfile),
+                  icon: Icon(Icons.edit, color: CustomColors.midnightExtress))
+            ],
+          ),
+          bottomNavigationBar:
+              bottomNavigationBar(context, index: 2, isClient: false),
+          body: switchedLoadingContainer(
+            _isLoading,
+            SafeArea(
+                child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _profileWidgets(),
+                  submitButton(context, label: 'LOG-OUT', onPress: () async {
+                    await FirebaseAuth.instance.signOut();
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  })
+                ],
+              ),
+            )),
           )),
-        ));
+    );
   }
 
   Widget _profileWidgets() {
     return Column(children: [
-      _supplierProfileHeaderContainer(),
+      midnightBGHeaderText(context, label: 'Supplier\'s Profile'),
       all20Pix(
           child: Column(
         children: [
@@ -98,26 +125,11 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
           _portfolioSelection(),
           _introductionWidget(),
           _fixedRateWidget(),
-          _maxCapacityWidget()
+          _maxCapacityWidget(),
+          _premiumSupplier()
         ],
       ))
     ]);
-  }
-
-  Widget _supplierProfileHeaderContainer() {
-    return Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height * 0.1,
-      color: CustomColors.midnightExtress,
-      child: Center(
-        child: comicNeueText(
-            label: 'Supplier\'s Profile',
-            color: CustomColors.sweetCorn,
-            textAlign: TextAlign.center,
-            fontSize: 30,
-            fontWeight: FontWeight.bold),
-      ),
-    );
   }
 
   Widget _formattedNameWidget() {
@@ -190,7 +202,8 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
                   label: 'Fixed Rate:',
                   fontSize: 18,
                   fontWeight: FontWeight.bold),
-              comicNeueText(label: _fixedRate.toStringAsFixed(2), fontSize: 18)
+              comicNeueText(
+                  label: 'PHP ${_fixedRate.toStringAsFixed(2)}', fontSize: 18)
             ],
           ),
         ),
@@ -264,5 +277,53 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
             ),
           )),
     ]);
+  }
+
+  Widget _premiumSupplier() {
+    int daysBeforeExpiration =
+        _premiumSupplierExpirationDate.difference(DateTime.now()).inDays;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        SizedBox(
+          width: 150,
+          child: Column(children: [
+            Gap(60),
+            _isPremiumSupplier
+                ? Column(
+                    children: [
+                      comicNeueText(
+                          label:
+                              'Your premium subscription expires in ${daysBeforeExpiration} days.',
+                          fontWeight: FontWeight.bold),
+                      if (daysBeforeExpiration < 3)
+                        ElevatedButton(
+                            onPressed: () => Navigator.of(context)
+                                .pushNamed(NavigatorRoutes.availPremium),
+                            child: comicNeueText(
+                                label: 'Extend subscription?',
+                                fontWeight: FontWeight.bold,
+                                textAlign: TextAlign.center,
+                                color: CustomColors.sweetCorn))
+                    ],
+                  )
+                : latestPremiumSupplierPayment.isNotEmpty
+                    ? comicNeueText(
+                        label:
+                            'Your premium supplier application is still pending.',
+                        textAlign: TextAlign.center,
+                        fontWeight: FontWeight.bold)
+                    : ElevatedButton(
+                        onPressed: () => Navigator.of(context)
+                            .pushNamed(NavigatorRoutes.availPremium),
+                        child: comicNeueText(
+                            label: 'Avail Premium Membership',
+                            fontWeight: FontWeight.bold,
+                            textAlign: TextAlign.center,
+                            color: CustomColors.sweetCorn))
+          ]),
+        ),
+      ],
+    );
   }
 }

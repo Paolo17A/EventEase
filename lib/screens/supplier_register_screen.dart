@@ -46,6 +46,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
   final _maxCapacityController = TextEditingController();
 
   void registerNewUser() async {
+    FocusScope.of(context).unfocus();
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
@@ -62,25 +63,25 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .set({
-        'hasPaidMembership': false,
-        'proofOfPayment': '',
-        'isPremiumSupplier': false,
-        'proofOfPremiumPayments': [],
         'userType': 'SUPPLIER',
-        'offeredService': _selectedService,
-        'portfolio': [],
         'email': _emailController.text,
         'password': _passwordController.text,
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
-        'currentClients': [],
-        'currentEvents': [],
+        'offeredService': _selectedService,
         'businessName': _businessNameController.text,
-        'feedback': [],
         'profileImageURL': '',
+        'portfolio': [],
         'introduction': _introductionController.text,
         'fixedRate': double.parse(_fixedRateController.text),
-        'maxCapacity': int.parse(_maxCapacityController.text)
+        'maxCapacity': int.parse(_maxCapacityController.text),
+        'membershipPayment': '',
+        'isPremiumSupplier': false,
+        'premiumSupplierExpirationDate': DateTime(1970),
+        'latestPremiumSupplierPayment': '',
+        'currentClients': [],
+        'currentEvents': [],
+        'feedbackHistory': [],
       });
 
       //  Handle Portfolio Entries
@@ -367,19 +368,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
 
   Widget _profileWidget() {
     return Column(children: [
-      Container(
-        width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.1,
-        color: CustomColors.midnightExtress,
-        child: Center(
-          child: comicNeueText(
-              label: 'Supplier\'s Profile',
-              color: CustomColors.sweetCorn,
-              textAlign: TextAlign.center,
-              fontSize: 30,
-              fontWeight: FontWeight.bold),
-        ),
-      ),
+      whiteBGHeaderText(context, label: 'Supplier\'s Profile'),
       _selectedServiceWidget(),
       _buildProfileImageWidget(),
       labelledTextField(context,
@@ -401,9 +390,11 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
   }
 
   Widget _selectedServiceWidget() {
-    return all20Pix(
-        child: comicNeueText(
-            label: 'Applying as:\n$_selectedService', fontSize: 20));
+    return Row(children: [
+      all20Pix(
+          child: comicNeueText(
+              label: 'Applying as:\n$_selectedService', fontSize: 20))
+    ]);
   }
 
   Widget _buildProfileImageWidget() {

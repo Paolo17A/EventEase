@@ -12,6 +12,7 @@ TextStyle buttonSweetCornStyle() {
 
 Text comicNeueText(
     {required String label,
+    TextOverflow? overflow,
     Color? color,
     FontWeight? fontWeight,
     double? fontSize,
@@ -20,5 +21,8 @@ Text comicNeueText(
       textAlign: textAlign,
       style: GoogleFonts.comicNeue(
           textStyle: TextStyle(
-              color: color, fontWeight: fontWeight, fontSize: fontSize)));
+              overflow: overflow,
+              color: color,
+              fontWeight: fontWeight,
+              fontSize: fontSize)));
 }

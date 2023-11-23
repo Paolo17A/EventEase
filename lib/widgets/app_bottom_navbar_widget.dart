@@ -16,10 +16,8 @@ void _processPress(BuildContext context, selectedIndex, int currentIndex,
       //  Current user is client
       if (isClient) {
         if (hasEvent) {
-          print('has event');
-          //Navigator.of(context).pushNamed(routeName);
+          Navigator.of(context).pushNamed(NavigatorRoutes.currentEvent);
         } else {
-          print('no event');
           Navigator.of(context).pushNamed(NavigatorRoutes.servicesOffered);
         }
       }

@@ -59,7 +59,22 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
       },
       child: Scaffold(
           appBar: AppBar(
-              actions: [IconButton(onPressed: () {}, icon: Icon(Icons.edit))]),
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context)
+                        .pushReplacementNamed(NavigatorRoutes.clientHome);
+                  },
+                  icon: Icon(Icons.arrow_back,
+                      color: CustomColors.midnightExtress)),
+              actions: [
+                IconButton(
+                    onPressed: () => Navigator.of(context)
+                        .pushNamed(NavigatorRoutes.editClientProfile),
+                    icon: Icon(Icons.edit, color: CustomColors.midnightExtress))
+              ]),
           bottomNavigationBar:
               bottomNavigationBar(context, index: 2, isClient: true),
           body: switchedLoadingContainer(
@@ -85,13 +100,18 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
   }
 
   Widget _profileWidgets() {
-    return all20Pix(
-        child: Column(children: [
-      _profileImageWidget(),
-      Gap(30),
-      _nameRowWidget(),
-      _emailRowWidget(),
-    ]));
+    return Column(
+      children: [
+        midnightBGHeaderText(context, label: 'Client\'s Profile'),
+        all20Pix(
+            child: Column(children: [
+          _profileImageWidget(),
+          Gap(30),
+          _nameRowWidget(),
+          _emailRowWidget(),
+        ])),
+      ],
+    );
   }
 
   Widget _profileImageWidget() {

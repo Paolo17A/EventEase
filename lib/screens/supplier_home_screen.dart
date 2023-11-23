@@ -23,6 +23,7 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
 
   @override
   void didChangeDependencies() {
+    print('chaning');
     super.didChangeDependencies();
     getClientData();
   }
@@ -64,7 +65,7 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
               SingleChildScrollView(
                 child: Column(
                   children: [
-                    myAccountHeader(context),
+                    whiteBGHeaderText(context, label: 'My Account'),
                     const Gap(50),
                     _actionButtons()
                   ],

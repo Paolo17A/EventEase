@@ -26,6 +26,7 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
   }
 
   void loginClient() async {
+    FocusScope.of(context).unfocus();
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
@@ -38,32 +39,44 @@ class _ClientLoginScreenState extends State<ClientLoginScreen> {
 
       final userData = await getCurrentUserData();
       if (userData['userType'] != 'CLIENT') {
-        scaffoldMessenger.showSnackBar(
-            const SnackBar(content: Text('This log-in is for clients only.')));
-        await FirebaseAuth.instance.signOut();
-
-        return;
-      }
-      bool hasPaidMembership = userData['hasPaidMembership'];
-      String proofOfPayment = userData['proofOfPayment'];
-      setState(() {
-        _isLoading = false;
-      });
-      if (hasPaidMembership) {
-        navigator.pushNamed(NavigatorRoutes.clientHome);
-      } else {
-        if (proofOfPayment.isNotEmpty) {
-          await FirebaseAuth.instance.signOut();
-          scaffoldMessenger.showSnackBar(SnackBar(
-              content: Text(
-                  'Your payment has not yet been verified by the admin.')));
+        if (userData['userType'] == 'ADMIN') {
           setState(() {
             _isLoading = false;
           });
+          Navigator.of(context).pushNamed(NavigatorRoutes.adminHome);
           return;
-        } else {
-          navigator.pushNamed(NavigatorRoutes.settleMembershipFee);
         }
+        setState(() {
+          _isLoading = false;
+        });
+        scaffoldMessenger.showSnackBar(
+            const SnackBar(content: Text('This log-in is for clients only.')));
+        await FirebaseAuth.instance.signOut();
+        return;
+      }
+      String membershipPayment = userData['membershipPayment'];
+      if (membershipPayment.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        navigator.pushNamed(NavigatorRoutes.settleMembershipFee);
+        return;
+      }
+
+      final transaction = await getThisTransaction(membershipPayment);
+      bool isVerified = transaction['verified'];
+      if (isVerified) {
+        navigator.pushNamed(NavigatorRoutes.clientHome);
+      } else {
+        await FirebaseAuth.instance.signOut();
+        setState(() {
+          _isLoading = false;
+        });
+        scaffoldMessenger.showSnackBar(SnackBar(
+            content:
+                Text('Your payment has not yet been verified by the admin.')));
+
+        return;
       }
     } catch (error) {
       scaffoldMessenger.showSnackBar(
