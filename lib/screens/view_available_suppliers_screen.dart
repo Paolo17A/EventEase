@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_ease/utils/custom_containers_widget.dart';
+import 'package:event_ease/utils/navigator_util.dart';
 import 'package:event_ease/widgets/custom_miscellaneous_widgets.dart';
 import 'package:event_ease/widgets/custom_padding_widgets.dart';
 import 'package:event_ease/widgets/profile_app_bar_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
 import '../utils/colors_util.dart';
@@ -89,13 +91,18 @@ class _ViewAvailableSuppliersScreenState
   Widget _eligibleSuppliersContainer() {
     return all20Pix(
         child: eligibleSuppliers.isNotEmpty
-            ? Wrap(
-                alignment: WrapAlignment.center,
-                runAlignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.start,
-                children: eligibleSuppliers
-                    .map((supplier) => _availableSupplierEntry(supplier))
-                    .toList())
+            ? SingleChildScrollView(
+                child: GridView.builder(
+                    shrinkWrap: true,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                        crossAxisCount: 2),
+                    itemCount: eligibleSuppliers.length,
+                    itemBuilder: (context, index) {
+                      return _availableSupplierEntry(eligibleSuppliers[index]);
+                    }),
+              )
             : Padding(
                 padding: const EdgeInsets.symmetric(vertical: 100),
                 child: comicNeueText(
@@ -112,24 +119,27 @@ class _ViewAvailableSuppliersScreenState
     String formattedName =
         '${supplierData['firstName']} ${supplier['lastName']}';
     String intro = supplierData['introduction'];
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.4,
-      child: ElevatedButton(
-          onPressed: () {},
-          child: Column(
-            children: [
-              buildProfileImageWidget(profileImageURL: profileImageURL),
-              comicNeueText(
-                  label: formattedName,
-                  color: Colors.white,
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold),
-              comicNeueText(
-                  label: intro,
-                  overflow: TextOverflow.ellipsis,
-                  color: Colors.white)
-            ],
-          )),
-    );
+    return ElevatedButton(
+        onPressed: () =>
+            NavigatorRoutes.selectedSupplier(context, supplierUID: supplier.id),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: buildProfileImageWidget(
+                  profileImageURL: profileImageURL, radius: 30),
+            ),
+            comicNeueText(
+                label: formattedName,
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold),
+            Gap(10),
+            comicNeueText(
+                label: intro,
+                //overflow: TextOverflow.ellipsis,
+                color: Colors.white)
+          ],
+        ));
   }
 }

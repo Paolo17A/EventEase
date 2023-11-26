@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_ease/utils/custom_containers_widget.dart';
+import 'package:event_ease/utils/firebase_util.dart';
 import 'package:event_ease/utils/navigator_util.dart';
 import 'package:event_ease/widgets/custom_padding_widgets.dart';
 import 'package:event_ease/widgets/profile_app_bar_widget.dart';
@@ -19,6 +21,41 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   bool _isLoading = true;
   String eventType = '';
   DateTime eventDate = DateTime.now();
+  String catering = '';
+  String cosmetologist = '';
+  String guestPlace = '';
+  String host = '';
+  String technician = '';
+  String photographer = '';
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    getCurrentEventData();
+  }
+
+  void getCurrentEventData() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      final userData = await getCurrentUserData();
+      final eventData = await getThisEvent(userData['currentEventID']);
+      eventType = eventData['eventType'];
+      eventDate = (eventData['eventDate'] as Timestamp).toDate();
+      catering = eventData['catering'];
+      cosmetologist = eventData['cosmetologist'];
+      guestPlace = eventData['guestPlace'];
+      host = eventData['host'];
+      technician = eventData['technician'];
+      photographer = eventData['photographer'];
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Error getting current event data: $error')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +71,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                 color: CustomColors.midnightExtress,
                 child: Center(
                   child: comicNeueText(
-                      label: 'What service would you like to add?',
+                      label: 'What service would you like to avail?',
                       color: CustomColors.sweetCorn,
                       textAlign: TextAlign.center,
                       fontSize: 25,
@@ -44,34 +81,40 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
               all20Pix(
                   child: Column(
                 children: [
-                  serviceButton(
-                      'CATERING',
-                      () => NavigatorRoutes.viewAvailableSuppliers(context,
-                          requiredService: 'CATERING', eventDate: eventDate)),
-                  serviceButton(
-                      'COSMETOLOGIST',
-                      () => NavigatorRoutes.viewAvailableSuppliers(context,
-                          requiredService: 'COSMETOLOGIST',
-                          eventDate: eventDate)),
-                  serviceButton(
-                      'GUEST\'S PLACE',
-                      () => NavigatorRoutes.viewAvailableSuppliers(context,
-                          requiredService: 'GUEST\'S PLACE',
-                          eventDate: eventDate)),
-                  serviceButton(
-                      'HOST',
-                      () => NavigatorRoutes.viewAvailableSuppliers(context,
-                          requiredService: 'HOST', eventDate: eventDate)),
-                  serviceButton(
-                      'LIGHT AND SOUND TECHNICIAN',
-                      () => NavigatorRoutes.viewAvailableSuppliers(context,
-                          requiredService: 'LIGHT AND SOUND TECHNICIAN',
-                          eventDate: eventDate)),
-                  serviceButton(
-                      'PHOTOGRAPHER AND VIDEOGRAPHER',
-                      () => NavigatorRoutes.viewAvailableSuppliers(context,
-                          requiredService: 'PHOTOGRAPHER AND VIDEOGRAPHER',
-                          eventDate: eventDate))
+                  if (catering.isEmpty)
+                    serviceButton(
+                        'CATERING',
+                        () => NavigatorRoutes.viewAvailableSuppliers(context,
+                            requiredService: 'CATERING', eventDate: eventDate)),
+                  if (cosmetologist.isEmpty)
+                    serviceButton(
+                        'COSMETOLOGIST',
+                        () => NavigatorRoutes.viewAvailableSuppliers(context,
+                            requiredService: 'COSMETOLOGIST',
+                            eventDate: eventDate)),
+                  if (guestPlace.isEmpty)
+                    serviceButton(
+                        'GUEST\'S PLACE',
+                        () => NavigatorRoutes.viewAvailableSuppliers(context,
+                            requiredService: 'GUEST\'S PLACE',
+                            eventDate: eventDate)),
+                  if (host.isEmpty)
+                    serviceButton(
+                        'HOST',
+                        () => NavigatorRoutes.viewAvailableSuppliers(context,
+                            requiredService: 'HOST', eventDate: eventDate)),
+                  if (technician.isEmpty)
+                    serviceButton(
+                        'LIGHT AND SOUND TECHNICIAN',
+                        () => NavigatorRoutes.viewAvailableSuppliers(context,
+                            requiredService: 'LIGHT AND SOUND TECHNICIAN',
+                            eventDate: eventDate)),
+                  if (photographer.isEmpty)
+                    serviceButton(
+                        'PHOTOGRAPHER AND VIDEOGRAPHER',
+                        () => NavigatorRoutes.viewAvailableSuppliers(context,
+                            requiredService: 'PHOTOGRAPHER AND VIDEOGRAPHER',
+                            eventDate: eventDate))
                 ],
               )),
             ],

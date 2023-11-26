@@ -80,6 +80,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
         'premiumSupplierExpirationDate': DateTime(1970),
         'latestPremiumSupplierPayment': '',
         'currentClients': [],
+        'serviceRequests': [],
         'currentEvents': [],
         'feedbackHistory': [],
       });

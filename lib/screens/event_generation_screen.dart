@@ -72,8 +72,7 @@ class _EventGenerationScreenState extends State<EventGenerationScreen> {
           _isLoading = false;
         });
       }
-      NavigatorRoutes.selectService(context,
-          eventType: widget.eventType, eventDate: _selectedDate!);
+      Navigator.of(context).pushReplacementNamed(NavigatorRoutes.addService);
     } catch (error) {
       scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Error generating event: $error')));
