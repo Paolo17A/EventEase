@@ -59,8 +59,8 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
       child: Scaffold(
           appBar: profileAppBar(context,
               profileImageURL: profileImageURL, formattedName: formattedName),
-          bottomNavigationBar:
-              bottomNavigationBar(context, index: 0, isClient: false),
+          bottomNavigationBar: bottomNavigationBar(context,
+              index: 0, isClient: false, isHomeScreen: true),
           body: switchedLoadingContainer(
               _isLoading,
               SingleChildScrollView(
@@ -101,7 +101,8 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
           roundedImageButton(context,
               label: 'Event History',
               imagePath: 'assets/images/Event History.png',
-              onPress: () {})
+              onPress: () =>
+                  Navigator.of(context).pushNamed(NavigatorRoutes.eventHistory))
         ]),
       ),
       roundedImageButton(context,

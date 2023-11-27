@@ -64,6 +64,7 @@ class _EventGenerationScreenState extends State<EventGenerationScreen> {
           'eventDate': _selectedDate,
           'clientUID': FirebaseAuth.instance.currentUser!.uid,
           'isFinished': false,
+          'isCancelled': false,
           'catering': emptyServiceMap,
           'cosmetologist': emptyServiceMap,
           'guestPlace': emptyServiceMap,

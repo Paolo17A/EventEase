@@ -9,6 +9,7 @@ class NavigatorRoutes {
   static const String forgotPassword = '/forgotPassword';
   static const String settleMembershipFee = '/settleMembershipFee';
   static const String feedbackHistory = '/feedbackHistory';
+  static const String eventHistory = '/eventHistory';
 
   //  CLIENT
   static const String clientLogin = '/clientLogin';
@@ -28,6 +29,7 @@ class NavigatorRoutes {
   static const String availPremium = '/availPremium';
   static const String editSupplierProfile = '/editSupplierProfile';
   static const String currentCustomers = '/currentCustomers';
+  static const String supplierCalendar = '/supplierCalendar';
 
   //  ADMIN
   static const String adminHome = '/adminHome';

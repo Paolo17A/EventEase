@@ -22,7 +22,9 @@ void _processPress(BuildContext context, selectedIndex, int currentIndex,
         }
       }
       //  Current user is supplier
-      else {}
+      else {
+        Navigator.of(context).pushNamed(NavigatorRoutes.supplierCalendar);
+      }
       break;
     case 1:
       break;

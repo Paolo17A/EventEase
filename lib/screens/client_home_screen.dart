@@ -104,7 +104,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           roundedImageButton(context,
               label: 'Event History',
               imagePath: 'assets/images/Event History.png',
-              onPress: () {})
+              onPress: () =>
+                  Navigator.of(context).pushNamed(NavigatorRoutes.eventHistory))
         ]),
       ),
       roundedImageButton(context,
