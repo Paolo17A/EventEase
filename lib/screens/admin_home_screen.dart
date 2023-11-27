@@ -42,8 +42,13 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                         .pushNamed(NavigatorRoutes.membershipRequests),
                     label: 'MEMBERSHIP REQUESTS'),
                 _adminHomeButton(
-                    onPress: () {}, label: 'PREMIUM RENEWAL REQUESTS'),
-                _adminHomeButton(onPress: () {}, label: 'SERVICE TRANSACTIONS'),
+                    onPress: () => Navigator.of(context)
+                        .pushNamed(NavigatorRoutes.premiumRequests),
+                    label: 'PREMIUM RENEWAL REQUESTS'),
+                _adminHomeButton(
+                    onPress: () => Navigator.of(context)
+                        .pushNamed(NavigatorRoutes.handlePayments),
+                    label: 'SERVICE TRANSACTIONS'),
                 _adminHomeButton(onPress: () {}, label: 'CASH-OUT REQUESTS'),
               ],
             )),

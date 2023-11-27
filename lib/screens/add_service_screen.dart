@@ -41,12 +41,12 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
       final eventData = await getThisEvent(userData['currentEventID']);
       eventType = eventData['eventType'];
       eventDate = (eventData['eventDate'] as Timestamp).toDate();
-      catering = eventData['catering'];
-      cosmetologist = eventData['cosmetologist'];
-      guestPlace = eventData['guestPlace'];
-      host = eventData['host'];
-      technician = eventData['technician'];
-      photographer = eventData['photographer'];
+      catering = eventData['catering']['supplier'];
+      cosmetologist = eventData['cosmetologist']['supplier'];
+      guestPlace = eventData['guestPlace']['supplier'];
+      host = eventData['host']['supplier'];
+      technician = eventData['technician']['supplier'];
+      photographer = eventData['photographer']['supplier'];
       setState(() {
         _isLoading = false;
       });

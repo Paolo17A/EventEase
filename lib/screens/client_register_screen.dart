@@ -75,7 +75,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen> {
         'lastName': _lastNameController.text,
         'profileImageURL': '',
         'currentEventID': '',
-        'availedSuppliers': {},
+        'availedSuppliers': [],
         'transactionHistory': [],
         'feedbackHistory': [],
         'membershipPayment': '',

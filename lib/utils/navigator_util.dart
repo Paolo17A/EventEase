@@ -1,5 +1,6 @@
 import 'package:event_ease/screens/event_generation_screen.dart';
 import 'package:event_ease/screens/selected_supplier_screen.dart';
+import 'package:event_ease/screens/settle_payment_screen.dart';
 import 'package:event_ease/screens/view_available_suppliers_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -7,6 +8,7 @@ class NavigatorRoutes {
   static const String welcome = '/';
   static const String forgotPassword = '/forgotPassword';
   static const String settleMembershipFee = '/settleMembershipFee';
+  static const String feedbackHistory = '/feedbackHistory';
 
   //  CLIENT
   static const String clientLogin = '/clientLogin';
@@ -25,10 +27,13 @@ class NavigatorRoutes {
   static const String supplierProfile = '/supplierProfile';
   static const String availPremium = '/availPremium';
   static const String editSupplierProfile = '/editSupplierProfile';
+  static const String currentCustomers = '/currentCustomers';
 
   //  ADMIN
   static const String adminHome = '/adminHome';
   static const String membershipRequests = '/membershipRequests';
+  static const String premiumRequests = '/premiumRequests';
+  static const String handlePayments = '/handlePayments';
 
   static void eventGeneration(BuildContext context,
       {required String eventType}) {
@@ -48,5 +53,20 @@ class NavigatorRoutes {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) =>
             SelectedSupplierScreen(supplierUID: supplierUID)));
+  }
+
+  static void settlePayment(BuildContext context,
+      {required String eventID,
+      required String paymentType,
+      required double paymentAmount,
+      required String serviceOffered,
+      required String supplierID}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => SettlePaymentScreen(
+            eventID: eventID,
+            paymentType: paymentType,
+            paymentAmount: paymentAmount,
+            serviceOffered: serviceOffered,
+            supplierID: supplierID)));
   }
 }

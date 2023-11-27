@@ -20,6 +20,7 @@ class ClientProfileScreen extends StatefulWidget {
 
 class _ClientProfileScreenState extends State<ClientProfileScreen> {
   bool _isLoading = true;
+  bool hasEvent = false;
   String profileImageURL = '';
   String formattedName = '';
   String email = '';
@@ -37,6 +38,7 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
       profileImageURL = userData['profileImageURL'];
       formattedName = '${userData['firstName']} ${userData['lastName']}';
       email = userData['email'];
+      hasEvent = userData['currentEventID'].toString().isNotEmpty;
       setState(() {
         _isLoading = false;
       });
@@ -75,8 +77,8 @@ class _ClientProfileScreenState extends State<ClientProfileScreen> {
                         .pushNamed(NavigatorRoutes.editClientProfile),
                     icon: Icon(Icons.edit, color: CustomColors.midnightExtress))
               ]),
-          bottomNavigationBar:
-              bottomNavigationBar(context, index: 2, isClient: true),
+          bottomNavigationBar: bottomNavigationBar(context,
+              index: 2, isClient: true, hasEvent: hasEvent),
           body: switchedLoadingContainer(
             _isLoading,
             SafeArea(

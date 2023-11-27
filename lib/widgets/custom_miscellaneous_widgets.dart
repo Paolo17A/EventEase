@@ -176,19 +176,22 @@ Widget buildProfileImageWidget(
   ]);
 }
 
-Widget midnightBGHeaderText(BuildContext context, {required String label}) {
+Widget midnightBGHeaderText(BuildContext context,
+    {required String label, double fontSize = 30}) {
   return Container(
-    width: double.infinity,
+    width: MediaQuery.of(context).size.width,
     height: MediaQuery.of(context).size.height * 0.1,
     color: CustomColors.midnightExtress,
     child: Row(children: [
-      all20Pix(
-          child: comicNeueText(
-              label: label,
-              color: CustomColors.sweetCorn,
-              textAlign: TextAlign.center,
-              fontSize: 30,
-              fontWeight: FontWeight.bold))
+      SizedBox(
+        child: all20Pix(
+            child: comicNeueText(
+                label: label,
+                color: CustomColors.sweetCorn,
+                textAlign: TextAlign.center,
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold)),
+      )
     ]),
   );
 }
@@ -248,7 +251,7 @@ Widget paymentOptions() {
       children: [
         comicNeueText(
             label:
-                'You may settle the membership fee via any of the following channels:',
+                'You may settle the required payment via any of the following channels:',
             fontWeight: FontWeight.bold,
             fontSize: 20),
         Gap(20),

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../utils/log_out_util.dart';
+import '../utils/navigator_util.dart';
 import '../widgets/custom_miscellaneous_widgets.dart';
 
 class ClientHomeScreen extends StatefulWidget {
@@ -90,7 +91,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         roundedImageButton(context,
             label: 'Feedbacks',
             imagePath: 'assets/images/Feedback.png',
-            onPress: () {})
+            onPress: () => Navigator.of(context)
+                .pushNamed(NavigatorRoutes.feedbackHistory))
       ]),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 30),

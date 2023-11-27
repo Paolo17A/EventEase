@@ -1,44 +1,47 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:event_ease/utils/colors_util.dart';
 import 'package:event_ease/utils/custom_containers_widget.dart';
-import 'package:event_ease/widgets/custom_miscellaneous_widgets.dart';
 import 'package:event_ease/widgets/profile_app_bar_widget.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/colors_util.dart';
+import '../widgets/custom_miscellaneous_widgets.dart';
 import '../widgets/custom_padding_widgets.dart';
 import '../widgets/custom_styling_widgets.dart';
 
-class MembershipRequestsScreen extends StatefulWidget {
-  const MembershipRequestsScreen({super.key});
+class PremiumRequestsScreen extends StatefulWidget {
+  const PremiumRequestsScreen({super.key});
 
   @override
-  State<MembershipRequestsScreen> createState() =>
-      _MembershipRequestsScreenState();
+  State<PremiumRequestsScreen> createState() => _PremiumRequestsScreenState();
 }
 
-class _MembershipRequestsScreenState extends State<MembershipRequestsScreen> {
+class _PremiumRequestsScreenState extends State<PremiumRequestsScreen> {
   bool _isLoading = true;
-  List<DocumentSnapshot> pendingMembershipRequests =
-      []; //  From Transactions Collection
-  List<DocumentSnapshot> associatedMemberDocs = []; //  From Users Collection
+
+  //  From Transactions Collection
+  List<DocumentSnapshot> pendingPremiumRequests = [];
+
+  //  From Users Collection
+  List<DocumentSnapshot> associatedMemberDocs = [];
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    getMembershipRequests();
+    getPremiumRequests();
   }
 
-  void getMembershipRequests() async {
+  void getPremiumRequests() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
-      final membershipRequests = await FirebaseFirestore.instance
+      final premiumRequests = await FirebaseFirestore.instance
           .collection('transactions')
-          .where('transactionType', isEqualTo: 'MEMBERSHIP')
+          .where('transactionType', isEqualTo: 'PREMIUM')
           .where('verified', isEqualTo: false)
           .get();
-      pendingMembershipRequests = membershipRequests.docs;
-      for (var transactionDoc in pendingMembershipRequests) {
+      pendingPremiumRequests = premiumRequests.docs;
+      associatedMemberDocs.clear();
+      for (var transactionDoc in pendingPremiumRequests) {
         String memberUID = transactionDoc['user'];
         final memberDoc = await FirebaseFirestore.instance
             .collection('users')
@@ -58,43 +61,64 @@ class _MembershipRequestsScreenState extends State<MembershipRequestsScreen> {
     }
   }
 
-  void updateTransactionRequest(
-      String transactionID, bool verifiedValue, String userID) async {
+  void handlePremiumRequest(DocumentSnapshot transactionDoc,
+      DocumentSnapshot supplierDoc, bool isGranted) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
-      if (verifiedValue) {
+      //  The request is granted
+      if (isGranted) {
+        //  Set the transaction's verified status to true
         await FirebaseFirestore.instance
             .collection('transactions')
-            .doc(transactionID)
-            .update({'verified': verifiedValue, 'dateSettled': DateTime.now()});
-      } else {
-        //  Reset membership payment value in user's account
+            .doc(transactionDoc.id)
+            .update({'verified': isGranted, 'dateSettled': DateTime.now()});
+
+        //  Update the supplier's premium status fields
+        final supplierData = supplierDoc.data() as Map<dynamic, dynamic>;
+        Timestamp currentExpirationDate =
+            supplierData['premiumSupplierExpirationDate'];
+        DateTime convertedExpirationDate = currentExpirationDate.toDate();
+        DateTime newExpirationDate = convertedExpirationDate.year == 1970
+            ? DateTime.now().add(Duration(days: 30))
+            : convertedExpirationDate.add(Duration(days: 30));
         await FirebaseFirestore.instance
             .collection('users')
-            .doc(userID)
-            .update({'membershipPayment': ''});
-
+            .doc(supplierDoc.id)
+            .update({
+          'isPremiumSupplier': true,
+          'premiumSupplierExpirationDate': newExpirationDate
+        });
+      }
+      //  The request is denied
+      else {
         //  Delete the transaction document
         await FirebaseFirestore.instance
             .collection('transactions')
-            .doc(transactionID)
+            .doc(transactionDoc.id)
             .delete();
+
+        //  Update the supplier's premium status fields
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(supplierDoc.id)
+            .update({
+          'latestPremiumSupplierPayment': '',
+          'premiumSupplierExpirationDate': DateTime(1970)
+        });
 
         //  Delete the proof of payment
         final storageRef = FirebaseStorage.instance
             .ref()
             .child('transactions')
-            .child('membership')
-            .child(userID);
+            .child('premium')
+            .child(supplierDoc.id);
         await storageRef.delete();
       }
-      getMembershipRequests();
+
+      getPremiumRequests();
     } catch (error) {
       scaffoldMessenger.showSnackBar(SnackBar(
-          content: Text('Error updating membership requests: $error')));
-      setState(() {
-        _isLoading = false;
-      });
+          content: Text('Error hanndling premium supplier request: $error')));
     }
   }
 
@@ -107,7 +131,8 @@ class _MembershipRequestsScreenState extends State<MembershipRequestsScreen> {
           SafeArea(
               child: Column(
             children: [
-              midnightBGHeaderText(context, label: 'Membership Requests'),
+              midnightBGHeaderText(context,
+                  label: 'Premium Supplier Requests', fontSize: 28),
               membershipRequestsContainer()
             ],
           ))),
@@ -116,25 +141,25 @@ class _MembershipRequestsScreenState extends State<MembershipRequestsScreen> {
 
   Widget membershipRequestsContainer() {
     return all20Pix(
-        child: pendingMembershipRequests.isNotEmpty
+        child: pendingPremiumRequests.isNotEmpty
             ? SingleChildScrollView(
                 child: Column(
-                children: pendingMembershipRequests.map((request) {
+                children: pendingPremiumRequests.map((request) {
                   final requestData = request.data() as Map<dynamic, dynamic>;
                   DocumentSnapshot memberDoc = associatedMemberDocs
                       .where((member) => member.id == requestData['user'])
                       .first;
-                  return _membershipRequestEntry(memberDoc, request);
+                  return _premiumRequestEntry(memberDoc, request);
                 }).toList(),
               ))
             : comicNeueText(
-                label: 'NO PENDING MEMBERSHIP REQUESTS',
+                label: 'NO PENDING PREMIUM SUPPLIER REQUESTS',
                 fontSize: 35,
                 fontWeight: FontWeight.bold,
                 textAlign: TextAlign.center));
   }
 
-  Widget _membershipRequestEntry(
+  Widget _premiumRequestEntry(
       DocumentSnapshot memberDoc, DocumentSnapshot transactionDoc) {
     final memberData = memberDoc.data() as Map<dynamic, dynamic>;
     String profileImageURL = memberData['profileImageURL'];
@@ -169,8 +194,8 @@ class _MembershipRequestsScreenState extends State<MembershipRequestsScreen> {
                           SizedBox(
                             width: 80,
                             child: ElevatedButton(
-                                onPressed: () => updateTransactionRequest(
-                                    transactionDoc.id, true, memberDoc.id),
+                                onPressed: () => handlePremiumRequest(
+                                    transactionDoc, memberDoc, true),
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: CustomColors.sweetCorn),
                                 child: comicNeueText(
@@ -183,8 +208,8 @@ class _MembershipRequestsScreenState extends State<MembershipRequestsScreen> {
                             child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: CustomColors.sweetCorn),
-                                onPressed: () => updateTransactionRequest(
-                                    transactionDoc.id, false, memberDoc.id),
+                                onPressed: () => handlePremiumRequest(
+                                    transactionDoc, memberDoc, false),
                                 child: comicNeueText(
                                     label: 'DENY',
                                     color: CustomColors.midnightExtress,

@@ -42,7 +42,7 @@ class _SettleMembershipFeeScreenState extends State<SettleMembershipFeeScreen> {
       setState(() {
         _isLoading = true;
       });
-      //  Handle Profile Image
+      //  Handle Upload Membership Image
       final storageRef = FirebaseStorage.instance
           .ref()
           .child('transactions')

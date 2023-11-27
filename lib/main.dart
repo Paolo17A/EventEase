@@ -6,11 +6,15 @@ import 'package:event_ease/screens/client_home_screen.dart';
 import 'package:event_ease/screens/client_login_screen.dart';
 import 'package:event_ease/screens/client_profile_screen.dart';
 import 'package:event_ease/screens/client_register_screen.dart';
+import 'package:event_ease/screens/current_customers_screen.dart';
 import 'package:event_ease/screens/current_event_screen.dart';
 import 'package:event_ease/screens/edit_client_profile_screen.dart';
 import 'package:event_ease/screens/edit_supplier_profile_screen.dart';
+import 'package:event_ease/screens/feedback_history_screen.dart';
 import 'package:event_ease/screens/forgot_password_screen.dart';
+import 'package:event_ease/screens/handle_payment_screen.dart';
 import 'package:event_ease/screens/membership_requests_screen.dart';
+import 'package:event_ease/screens/premium_requests_screen.dart';
 import 'package:event_ease/screens/services_offered_screen.dart';
 import 'package:event_ease/screens/settle_membership_fee_screen.dart';
 import 'package:event_ease/screens/supplier_home_screen.dart';
@@ -39,6 +43,8 @@ final Map<String, WidgetBuilder> _routes = {
   NavigatorRoutes.forgotPassword: (context) => ForgotPasswordScreen(),
   NavigatorRoutes.settleMembershipFee: (context) =>
       const SettleMembershipFeeScreen(),
+  NavigatorRoutes.feedbackHistory: (context) => const FeedBackHistoryScreen(),
+
   //CLIENT
   NavigatorRoutes.clientLogin: (context) => const ClientLoginScreen(),
   NavigatorRoutes.clientRegister: (context) => const ClientRegisterScreen(),
@@ -55,12 +61,16 @@ final Map<String, WidgetBuilder> _routes = {
   NavigatorRoutes.supplierHome: (context) => const SupplierHomeScreen(),
   NavigatorRoutes.supplierProfile: (context) => const SupplierProfileScreen(),
   NavigatorRoutes.availPremium: (context) => const AvailPremiumScreen(),
-  NavigatorRoutes.editSupplierProfile: (context) => EditSupplierProfileScreen(),
+  NavigatorRoutes.editSupplierProfile: (context) =>
+      const EditSupplierProfileScreen(),
+  NavigatorRoutes.currentCustomers: (context) => const CurrentCustomersScreen(),
 
   //ADMIN
   NavigatorRoutes.adminHome: (context) => const AdminHomeScreen(),
   NavigatorRoutes.membershipRequests: (context) =>
-      const MembershipRequestsScreen()
+      const MembershipRequestsScreen(),
+  NavigatorRoutes.premiumRequests: (context) => const PremiumRequestsScreen(),
+  NavigatorRoutes.handlePayments: (context) => const HandlePaymentScreen()
 };
 
 final ThemeData _themeData = ThemeData(

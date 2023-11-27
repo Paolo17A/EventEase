@@ -290,7 +290,8 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
           child: Column(children: [
             Gap(60),
             _isPremiumSupplier
-                ? Column(
+                ? //  The supplier IS premium
+                Column(
                     children: [
                       comicNeueText(
                           label:
@@ -307,7 +308,8 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
                                 color: CustomColors.sweetCorn))
                     ],
                   )
-                : latestPremiumSupplierPayment.isNotEmpty
+                : //  The supplier has either no premium membership OR their request is still pending
+                latestPremiumSupplierPayment.isNotEmpty
                     ? comicNeueText(
                         label:
                             'Your premium supplier application is still pending.',

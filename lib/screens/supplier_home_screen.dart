@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import '../utils/custom_containers_widget.dart';
 import '../utils/firebase_util.dart';
 import '../utils/log_out_util.dart';
+import '../utils/navigator_util.dart';
 import '../widgets/app_bottom_navbar_widget.dart';
 import '../widgets/custom_button_widgets.dart';
 import '../widgets/custom_miscellaneous_widgets.dart';
@@ -86,15 +87,17 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
         roundedImageButton(context,
             label: 'Feedbacks',
             imagePath: 'assets/images/Feedback.png',
-            onPress: () {})
+            onPress: () => Navigator.of(context)
+                .pushNamed(NavigatorRoutes.feedbackHistory))
       ]),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 30),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
           roundedImageButton(context,
               label: 'Customers',
-              imagePath: 'assets/images/Calendar.png',
-              onPress: () {}),
+              imagePath: 'assets/images/Customer.png',
+              onPress: () => Navigator.of(context)
+                  .pushNamed(NavigatorRoutes.currentCustomers)),
           roundedImageButton(context,
               label: 'Event History',
               imagePath: 'assets/images/Event History.png',

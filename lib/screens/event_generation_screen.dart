@@ -52,17 +52,24 @@ class _EventGenerationScreenState extends State<EventGenerationScreen> {
       final userData = await getCurrentUserData();
       if (userData['currentEventID'].toString().isEmpty) {
         String eventID = DateTime.now().millisecondsSinceEpoch.toString();
+        Map<dynamic, dynamic> emptyServiceMap = {
+          'supplier': '',
+          'confirmed': false,
+          'status': '',
+          'downPaymentTransaction': '',
+          'completionPaymentTransaction': ''
+        };
         await FirebaseFirestore.instance.collection('events').doc(eventID).set({
           'eventType': widget.eventType,
           'eventDate': _selectedDate,
           'clientUID': FirebaseAuth.instance.currentUser!.uid,
           'isFinished': false,
-          'catering': '',
-          'cosmetologist': '',
-          'guestPlace': '',
-          'host': '',
-          'technician': '',
-          'photographer': ''
+          'catering': emptyServiceMap,
+          'cosmetologist': emptyServiceMap,
+          'guestPlace': emptyServiceMap,
+          'host': emptyServiceMap,
+          'technician': emptyServiceMap,
+          'photographer': emptyServiceMap
         });
         await FirebaseFirestore.instance
             .collection('users')

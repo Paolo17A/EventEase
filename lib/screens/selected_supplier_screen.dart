@@ -83,10 +83,17 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
       final supplierData = await getThisUserData(widget.supplierUID);
       String offeredService =
           getServiceParameter(supplierData['offeredService']);
+      Map<dynamic, dynamic> serviceMap = {
+        'supplier': widget.supplierUID,
+        'confirmed': false,
+        'status': '',
+        'downPaymentTransaction': '',
+        'completionPaymentTransaction': ''
+      };
       await FirebaseFirestore.instance
           .collection('events')
           .doc(currentEventID)
-          .update({offeredService: widget.supplierUID});
+          .update({offeredService: serviceMap});
       scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Successfully sent service request')));
       setState(() {
