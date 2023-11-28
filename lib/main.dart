@@ -14,6 +14,7 @@ import 'package:event_ease/screens/event_history_screen.dart';
 import 'package:event_ease/screens/feedback_history_screen.dart';
 import 'package:event_ease/screens/forgot_password_screen.dart';
 import 'package:event_ease/screens/handle_payment_screen.dart';
+import 'package:event_ease/screens/income_history_screen.dart';
 import 'package:event_ease/screens/membership_requests_screen.dart';
 import 'package:event_ease/screens/premium_requests_screen.dart';
 import 'package:event_ease/screens/services_offered_screen.dart';
@@ -23,6 +24,7 @@ import 'package:event_ease/screens/supplier_home_screen.dart';
 import 'package:event_ease/screens/supplier_login_screen.dart';
 import 'package:event_ease/screens/supplier_profile_screen.dart';
 import 'package:event_ease/screens/supplier_register_screen.dart';
+import 'package:event_ease/screens/transaction_history_screen.dart';
 import 'package:event_ease/screens/welcome_screen.dart';
 import 'package:event_ease/utils/navigator_util.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -47,6 +49,8 @@ final Map<String, WidgetBuilder> _routes = {
       const SettleMembershipFeeScreen(),
   NavigatorRoutes.feedbackHistory: (context) => const FeedBackHistoryScreen(),
   NavigatorRoutes.eventHistory: (context) => const EventHistoryScreen(),
+  NavigatorRoutes.transactionHistory: (context) =>
+      const TransactionHistoryScreen(),
 
   //CLIENT
   NavigatorRoutes.clientLogin: (context) => const ClientLoginScreen(),
@@ -68,6 +72,7 @@ final Map<String, WidgetBuilder> _routes = {
       const EditSupplierProfileScreen(),
   NavigatorRoutes.currentCustomers: (context) => const CurrentCustomersScreen(),
   NavigatorRoutes.supplierCalendar: (context) => const SupplierCalendarScreen(),
+  NavigatorRoutes.incomeHistory: (context) => const IncomeHistoryScreen(),
 
   //ADMIN
   NavigatorRoutes.adminHome: (context) => const AdminHomeScreen(),

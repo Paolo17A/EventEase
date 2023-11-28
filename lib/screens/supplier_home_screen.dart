@@ -83,7 +83,8 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
         roundedImageButton(context,
             label: 'Income',
             imagePath: 'assets/images/Transactions.png',
-            onPress: () {}),
+            onPress: () =>
+                Navigator.of(context).pushNamed(NavigatorRoutes.incomeHistory)),
         roundedImageButton(context,
             label: 'Feedbacks',
             imagePath: 'assets/images/Feedback.png',

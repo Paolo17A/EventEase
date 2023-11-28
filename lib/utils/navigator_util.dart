@@ -20,6 +20,7 @@ class NavigatorRoutes {
   static const String editClientProfile = '/editClientProfile';
   static const String currentEvent = '/currentEvent';
   static const String addService = '/addService';
+  static const String transactionHistory = '/transactionHistory';
 
   //  SUPPLIER
   static const String supplierLogin = '/supplierLogin';
@@ -30,6 +31,7 @@ class NavigatorRoutes {
   static const String editSupplierProfile = '/editSupplierProfile';
   static const String currentCustomers = '/currentCustomers';
   static const String supplierCalendar = '/supplierCalendar';
+  static const String incomeHistory = '/incomeHistory';
 
   //  ADMIN
   static const String adminHome = '/adminHome';
