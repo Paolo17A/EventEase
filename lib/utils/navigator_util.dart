@@ -1,4 +1,6 @@
 import 'package:event_ease/screens/event_generation_screen.dart';
+import 'package:event_ease/screens/generate_by_budget_screen.dart';
+import 'package:event_ease/screens/generate_by_guest_count_screen.dart';
 import 'package:event_ease/screens/selected_supplier_screen.dart';
 import 'package:event_ease/screens/settle_payment_screen.dart';
 import 'package:event_ease/screens/view_available_suppliers_screen.dart';
@@ -21,6 +23,7 @@ class NavigatorRoutes {
   static const String currentEvent = '/currentEvent';
   static const String addService = '/addService';
   static const String transactionHistory = '/transactionHistory';
+  static const String editService = '/editService';
 
   //  SUPPLIER
   static const String supplierLogin = '/supplierLogin';
@@ -72,5 +75,25 @@ class NavigatorRoutes {
             paymentAmount: paymentAmount,
             serviceOffered: serviceOffered,
             supplierID: supplierID)));
+  }
+
+  static void generateByBudget(BuildContext context,
+      {required DateTime eventDate,
+      required double budget,
+      required String eventType}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => GenerateByBudgetScreen(
+            eventDate: eventDate, budget: budget, eventType: eventType)));
+  }
+
+  static void generateByGuestCount(BuildContext context,
+      {required DateTime eventDate,
+      required int guestCount,
+      required String eventType}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => GenerateByGuestCountScreen(
+            eventDate: eventDate,
+            guestCount: guestCount,
+            eventType: eventType)));
   }
 }

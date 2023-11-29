@@ -245,7 +245,7 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
   Widget _editEventButton() {
     return ElevatedButton(
         onPressed: () => Navigator.of(context)
-            .pushReplacementNamed(NavigatorRoutes.addService),
+            .pushReplacementNamed(NavigatorRoutes.editService),
         child: comicNeueText(
             label: 'Edit Event',
             fontSize: 21,

@@ -7,6 +7,7 @@ import 'package:event_ease/widgets/custom_padding_widgets.dart';
 import 'package:event_ease/widgets/profile_app_bar_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../utils/colors_util.dart';
 import '../utils/navigator_util.dart';
@@ -22,6 +23,7 @@ class CurrentCustomersScreen extends StatefulWidget {
 class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
   bool _isLoading = true;
   List<DocumentSnapshot> pendingCustomers = [];
+  List<DocumentSnapshot> eventDocuments = [];
 
   @override
   void didChangeDependencies() {
@@ -34,14 +36,34 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
     try {
       final userData = await getCurrentUserData();
       List<dynamic> serviceRequests = userData['serviceRequests'];
-      pendingCustomers.clear();
-      for (var request in serviceRequests) {
-        final customer = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(request)
-            .get();
-        pendingCustomers.add(customer);
+
+      if (serviceRequests.isEmpty) {
+        setState(() {
+          pendingCustomers.clear();
+          _isLoading = false;
+        });
+        return;
       }
+      //  Get all pending customers (if meron)
+      final customers = await FirebaseFirestore.instance
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: serviceRequests)
+          .get();
+      pendingCustomers = customers.docs;
+
+      //  Get all associated events
+      List<dynamic> eventIDs = [];
+      for (var customer in pendingCustomers) {
+        final customerData = customer.data() as Map<dynamic, dynamic>;
+        String currentEventID = customerData['currentEventID'];
+        eventIDs.add(currentEventID);
+      }
+
+      final events = await FirebaseFirestore.instance
+          .collection('events')
+          .where(FieldPath.documentId, whereIn: eventIDs)
+          .get();
+      eventDocuments = events.docs;
       setState(() {
         _isLoading = false;
       });
@@ -154,7 +176,13 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
             ? SingleChildScrollView(
                 child: Column(
                 children: pendingCustomers.map((customer) {
-                  return _membershipRequestEntry(customer);
+                  final customerData = customer.data() as Map<dynamic, dynamic>;
+                  String currentEventID = customerData['currentEventID'];
+                  return _membershipRequestEntry(
+                      customer,
+                      eventDocuments
+                          .where((event) => event.id == currentEventID)
+                          .first);
                 }).toList(),
               ))
             : comicNeueText(
@@ -164,11 +192,15 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
                 textAlign: TextAlign.center));
   }
 
-  Widget _membershipRequestEntry(DocumentSnapshot memberDoc) {
+  Widget _membershipRequestEntry(
+      DocumentSnapshot memberDoc, DocumentSnapshot eventDoc) {
     final memberData = memberDoc.data() as Map<dynamic, dynamic>;
     String profileImageURL = memberData['profileImageURL'];
     String formattedName =
         '${memberData['firstName']} ${memberData['lastName']}';
+    final eventData = eventDoc.data() as Map<dynamic, dynamic>;
+    String eventType = eventData['eventType'];
+    DateTime eventDate = (eventData['eventDate'] as Timestamp).toDate();
     return Padding(
       padding: EdgeInsets.all(5),
       child: Container(
@@ -182,42 +214,50 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
                 profileImageURL: profileImageURL, radius: 30),
             SizedBox(
               width: MediaQuery.of(context).size.width * 0.55,
-              child: Column(children: [
-                comicNeueText(
-                    label: formattedName,
-                    textAlign: TextAlign.center,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 26),
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      SizedBox(
-                        width: 80,
-                        child: ElevatedButton(
-                            onPressed: () =>
-                                handleServiceRequest(memberDoc, true),
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: CustomColors.sweetCorn),
-                            child: comicNeueText(
-                                label: 'GRANT',
-                                color: CustomColors.midnightExtress,
-                                fontWeight: FontWeight.bold)),
-                      ),
-                      SizedBox(
-                        width: 80,
-                        child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: CustomColors.sweetCorn),
-                            onPressed: () =>
-                                handleServiceRequest(memberDoc, false),
-                            child: comicNeueText(
-                                label: 'DENY',
-                                color: CustomColors.midnightExtress,
-                                fontWeight: FontWeight.bold)),
-                      )
-                    ])
-              ]),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    comicNeueText(
+                        label: formattedName,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 26),
+                    comicNeueText(
+                        label: eventType, color: Colors.white, fontSize: 20),
+                    comicNeueText(
+                        label:
+                            'Date: ${DateFormat('MMM dd, yyyy').format(eventDate)}',
+                        color: Colors.white,
+                        fontSize: 20),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          SizedBox(
+                            width: 80,
+                            child: ElevatedButton(
+                                onPressed: () =>
+                                    handleServiceRequest(memberDoc, true),
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: CustomColors.sweetCorn),
+                                child: comicNeueText(
+                                    label: 'GRANT',
+                                    color: CustomColors.midnightExtress,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                          SizedBox(
+                            width: 80,
+                            child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: CustomColors.sweetCorn),
+                                onPressed: () =>
+                                    handleServiceRequest(memberDoc, false),
+                                child: comicNeueText(
+                                    label: 'DENY',
+                                    color: CustomColors.midnightExtress,
+                                    fontWeight: FontWeight.bold)),
+                          )
+                        ])
+                  ]),
             )
           ]),
         ),

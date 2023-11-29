@@ -141,6 +141,7 @@ class _MembershipRequestsScreenState extends State<MembershipRequestsScreen> {
     String formattedName =
         '${memberData['firstName']} ${memberData['lastName']}';
     final transactionData = transactionDoc.data() as Map<dynamic, dynamic>;
+    String userType = memberData['userType'];
     String proofOfPayment = transactionData['proofOfPayment'];
     return Padding(
       padding: EdgeInsets.all(5),
@@ -163,6 +164,11 @@ class _MembershipRequestsScreenState extends State<MembershipRequestsScreen> {
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 26),
+                    comicNeueText(
+                        label: 'User Type: $userType',
+                        textAlign: TextAlign.center,
+                        color: Colors.white,
+                        fontSize: 21),
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [

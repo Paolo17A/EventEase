@@ -26,6 +26,7 @@ class _ViewAvailableSuppliersScreenState
     extends State<ViewAvailableSuppliersScreen> {
   bool _isLoading = true;
   List<DocumentSnapshot> eligibleSuppliers = [];
+  List<DocumentSnapshot> availableSuppliers = [];
 
   @override
   void didChangeDependencies() {
@@ -43,6 +44,102 @@ class _ViewAvailableSuppliersScreenState
           .where('offeredService', isEqualTo: widget.requiredService)
           .get();
       eligibleSuppliers = suppliers.docs;
+
+      if (eligibleSuppliers.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      //  Iterate through every eligible supplier. A supplier is eligible if they are offering ther desired service
+      for (var supplier in eligibleSuppliers) {
+        //  Get all of the current eligible supplier's associated clients from their currentClients list and serviceRequests list.
+        final supplierData = supplier.data() as Map<dynamic, dynamic>;
+
+        //  0. Check if the supplier has paid their membership request.
+        String membershipPayment = supplierData['membershipPayment'];
+        if (membershipPayment.isEmpty) continue;
+
+        final transaction = await FirebaseFirestore.instance
+            .collection('transactions')
+            .doc(membershipPayment)
+            .get();
+        final transactionData = transaction.data() as Map<dynamic, dynamic>;
+        bool verified = transactionData['verified'];
+        if (!verified) continue;
+
+        //  1. Filter all the supplier's current events.
+        List<dynamic> currentEvents = supplierData['currentEvents'];
+        if (currentEvents.isNotEmpty) {
+          final events = await FirebaseFirestore.instance
+              .collection('events')
+              .where(FieldPath.documentId, whereIn: currentEvents)
+              .get();
+          final supplierCurrentEventDocs = events.docs;
+
+          //  Iterate through every current event and search for a match.
+          bool hasMatchingDate = false;
+          for (var event in supplierCurrentEventDocs) {
+            final eventData = event.data();
+            DateTime eventDate = (eventData['eventDate'] as Timestamp).toDate();
+            //  If there is a matching date, set the hasMatchingDate bool to true and BREAK THE LOOP
+            if (isSameDate(eventDate)) {
+              hasMatchingDate = true;
+              break;
+            }
+          }
+          //  The supplier has a matching date and is therefore unavailable. CONTINUE to the next eligible supplier
+          if (hasMatchingDate) {
+            continue;
+          }
+        }
+
+        //  2. Filter the supplier's service requests.
+        //  We will only filter the supplier's service requests if there are NO current events that match the current date
+        List<dynamic> serviceRequests = supplierData['serviceRequests'];
+
+        //  The supplier has no service requests, and is therefore available.
+        if (serviceRequests.isEmpty) {
+          availableSuppliers.add(supplier);
+        }
+        //  There are existing service requests. We must iterate through each customer's current events to look for a match.
+        else {
+          final customers = await FirebaseFirestore.instance
+              .collection('users')
+              .where(FieldPath.documentId, whereIn: serviceRequests)
+              .get();
+
+          //  store all the event IDs in a local list to make the query easier.
+          List<dynamic> customerCurrentEventIDs = [];
+          final customerDocs = customers.docs;
+          for (var customer in customerDocs) {
+            final customerData = customer.data();
+            customerCurrentEventIDs.add(customerData['currentEventID']);
+          }
+
+          final customerCurrentEvents = await FirebaseFirestore.instance
+              .collection('events')
+              .where(FieldPath.documentId, whereIn: customerCurrentEventIDs)
+              .get();
+          final customerCurrentEventDocs = customerCurrentEvents.docs;
+
+          //  Iterate through every current event and search for a match.
+          bool hasMatchingDate = false;
+          for (var eventDoc in customerCurrentEventDocs) {
+            final currentEventData = eventDoc.data();
+            DateTime currentEventDate = currentEventData['eventDate'];
+            if (isSameDate(currentEventDate)) {
+              hasMatchingDate = true;
+              break;
+            }
+          }
+          //  There are no matching event dates thus this supplier is available.
+          if (!hasMatchingDate) {
+            availableSuppliers.add(supplier);
+          }
+        }
+      } //  End of eligible suppliers for loop.
       setState(() {
         _isLoading = false;
       });
@@ -53,6 +150,16 @@ class _ViewAvailableSuppliersScreenState
         _isLoading = false;
       });
       Navigator.of(context).pop();
+    }
+  }
+
+  bool isSameDate(DateTime targetDate) {
+    if (widget.eventDate.year == targetDate.year &&
+        widget.eventDate.month == targetDate.month &&
+        widget.eventDate.day == targetDate.day) {
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -90,7 +197,7 @@ class _ViewAvailableSuppliersScreenState
 
   Widget _eligibleSuppliersContainer() {
     return all20Pix(
-        child: eligibleSuppliers.isNotEmpty
+        child: availableSuppliers.isNotEmpty
             ? SingleChildScrollView(
                 child: GridView.builder(
                     shrinkWrap: true,
@@ -98,9 +205,9 @@ class _ViewAvailableSuppliersScreenState
                         crossAxisSpacing: 20,
                         mainAxisSpacing: 20,
                         crossAxisCount: 2),
-                    itemCount: eligibleSuppliers.length,
+                    itemCount: availableSuppliers.length,
                     itemBuilder: (context, index) {
-                      return _availableSupplierEntry(eligibleSuppliers[index]);
+                      return _availableSupplierEntry(availableSuppliers[index]);
                     }),
               )
             : Padding(
@@ -135,10 +242,7 @@ class _ViewAvailableSuppliersScreenState
                 fontSize: 22,
                 fontWeight: FontWeight.bold),
             Gap(10),
-            comicNeueText(
-                label: intro,
-                //overflow: TextOverflow.ellipsis,
-                color: Colors.white)
+            comicNeueText(label: intro, color: Colors.white)
           ],
         ));
   }

@@ -9,6 +9,7 @@ import 'package:event_ease/screens/client_register_screen.dart';
 import 'package:event_ease/screens/current_customers_screen.dart';
 import 'package:event_ease/screens/current_event_screen.dart';
 import 'package:event_ease/screens/edit_client_profile_screen.dart';
+import 'package:event_ease/screens/edit_service_screen.dart';
 import 'package:event_ease/screens/edit_supplier_profile_screen.dart';
 import 'package:event_ease/screens/event_history_screen.dart';
 import 'package:event_ease/screens/feedback_history_screen.dart';
@@ -61,6 +62,7 @@ final Map<String, WidgetBuilder> _routes = {
   NavigatorRoutes.editClientProfile: (context) => EditClientProfileScreen(),
   NavigatorRoutes.addService: (context) => const AddServiceScreen(),
   NavigatorRoutes.currentEvent: (context) => const CurrentEventScreen(),
+  NavigatorRoutes.editService: (context) => const EditServiceScreen(),
 
   //SUPPLIER
   NavigatorRoutes.supplierLogin: (context) => const SupplierLoginScreen(),

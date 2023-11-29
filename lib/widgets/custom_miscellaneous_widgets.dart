@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_ease/widgets/custom_padding_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -127,7 +128,7 @@ Widget labelledTextField(BuildContext context,
               fontWeight: FontWeight.bold,
               fontSize: 20),
           SizedBox(
-            width: MediaQuery.of(context).size.width * 0.65,
+            width: MediaQuery.of(context).size.width * 0.6,
             height: 40,
             child: EventEaseTextField(
                 text: '',
@@ -278,5 +279,66 @@ Widget paymentOptions() {
         )
       ],
     )),
+  );
+}
+
+Widget randomSupplierWidget(BuildContext context,
+    {required DocumentSnapshot? randomSupplier,
+    required String offeredService}) {
+  return vertical10Pix(
+    child: randomSupplier != null
+        ? randomSupplierData(context, randomSupplier: randomSupplier)
+        : Container(
+            height: MediaQuery.of(context).size.height * 0.1,
+            decoration: BoxDecoration(
+                border:
+                    Border.all(color: CustomColors.midnightExtress, width: 2)),
+            child: Center(
+              child: comicNeueText(
+                  label: 'NO $offeredService AVAILABLE',
+                  textAlign: TextAlign.center,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25),
+            ),
+          ),
+  );
+}
+
+Widget randomSupplierData(BuildContext context,
+    {required DocumentSnapshot randomSupplier}) {
+  final supplierData = randomSupplier.data() as Map<dynamic, dynamic>;
+  String profileImageURL = supplierData['profileImageURL'];
+  String formattedName =
+      '${supplierData['firstName']} ${supplierData['lastName']}';
+  double fixedRate = supplierData['fixedRate'];
+  String offeredService = supplierData['offeredService'];
+  return Container(
+    width: MediaQuery.of(context).size.width,
+    decoration: BoxDecoration(
+        border: Border.all(color: CustomColors.midnightExtress, width: 2)),
+    child: Column(
+      children: [
+        comicNeueText(
+            label: 'SERVICE: $offeredService',
+            fontWeight: FontWeight.bold,
+            fontSize: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            buildProfileImageWidget(
+                profileImageURL: profileImageURL, radius: 30),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                comicNeueText(label: 'NAME: $formattedName', fontSize: 22),
+                comicNeueText(
+                    label: 'RATE: PHP ${fixedRate.toStringAsFixed(2)}',
+                    fontSize: 22),
+              ],
+            )
+          ],
+        ),
+      ],
+    ),
   );
 }
