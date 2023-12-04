@@ -39,8 +39,11 @@ class _HandlePaymentScreenState extends State<HandlePaymentScreen> {
       final payments = await FirebaseFirestore.instance
           .collection('transactions')
           .where('verified', isEqualTo: false)
-          .where('transactionType',
-              whereIn: ['DOWN PAYMENT', 'COMPLETION PAYMENT']).get();
+          .where('transactionType', whereIn: [
+        'DOWN PAYMENT',
+        'COMPLETION PAYMENT',
+        'MULTIPLE PAYMENT'
+      ]).get();
       submittedPayments = payments.docs;
 
       if (submittedPayments.isEmpty) {
@@ -54,15 +57,29 @@ class _HandlePaymentScreenState extends State<HandlePaymentScreen> {
       List<String> associatedUIDs = [];
       for (var paymentRequest in submittedPayments) {
         final paymentData = paymentRequest.data() as Map<dynamic, dynamic>;
+        String transactionType = paymentData['transactionType'];
         String clientID = paymentData['user'];
-        String supplierID = paymentData['receiver'];
         if (!associatedUIDs.contains(clientID)) {
           associatedUIDs.add(clientID);
         }
-        if (!associatedUserDocs.contains(supplierID)) {
-          associatedUIDs.add(supplierID);
+
+        if (transactionType == 'DOWN PAYMENT' ||
+            transactionType == 'COMPLETION PAYMENT') {
+          String supplierID = paymentData['receiver'];
+
+          if (!associatedUserDocs.contains(supplierID)) {
+            associatedUIDs.add(supplierID);
+          }
+        } else if (transactionType == 'MULTIPLE PAYMENT') {
+          List<dynamic> supplierIDs = paymentData['receivers'];
+          for (var supplier in supplierIDs) {
+            if (!associatedUIDs.contains(supplier)) {
+              associatedUIDs.add(supplier);
+            }
+          }
         }
       }
+      print('associated users: $associatedUIDs');
 
       //  Get all associated user docs.
       final users = await FirebaseFirestore.instance
@@ -190,6 +207,130 @@ class _HandlePaymentScreenState extends State<HandlePaymentScreen> {
     }
   }
 
+  void handleMultiplePaymentSubmission(
+      DocumentSnapshot clientDoc,
+      List<DocumentSnapshot> supplierDocs,
+      DocumentSnapshot transactionDoc,
+      bool isAccepted) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      //  Get the current event's data
+      final clientData = clientDoc.data() as Map<dynamic, dynamic>;
+      String currentEventID = clientData['currentEventID'];
+      Map<dynamic, dynamic> eventData = await getThisEvent(currentEventID);
+
+      //  The submitted payment is accepted.
+      if (isAccepted) {
+        //  Set the transaction's verified status to true
+        await FirebaseFirestore.instance
+            .collection('transactions')
+            .doc(transactionDoc.id)
+            .update({'verified': isAccepted, 'dateSettled': DateTime.now()});
+
+        for (var supplier in supplierDocs) {
+          final supplierData = supplier.data() as Map<dynamic, dynamic>;
+          String serviceOffered = supplierData['offeredService'];
+          String serviceParameter = getServiceParameter(serviceOffered);
+          double fixedRate = supplierData['fixedRate'];
+          Map<dynamic, dynamic> currentSupplierMap =
+              eventData[serviceParameter];
+          String status = currentSupplierMap['status'];
+          /*final transactionData =
+              transactionDoc.data() as Map<dynamic, dynamic>;*/
+
+          //  Update the event's document
+          currentSupplierMap['confirmed'] = true;
+          if (status == 'PROCESSING DOWN PAYMENT')
+            currentSupplierMap['status'] = 'PENDING COMPLETION PAYMENT';
+          else if (status == 'PROCESSING COMPLETION PAYMENT')
+            currentSupplierMap['status'] = 'TO RATE';
+          await FirebaseFirestore.instance
+              .collection('events')
+              .doc(currentEventID)
+              .update({serviceParameter: currentSupplierMap});
+
+          //  Create an entry in the income collection
+          String incomeID = DateTime.now().millisecondsSinceEpoch.toString();
+          double receivedAmount = fixedRate - (fixedRate * 0.05);
+          String incomeType = status == 'PROCESSING DOWN PAYMENT'
+              ? 'DOWN PAYMENT'
+              : 'COMPLETION PAYMENT';
+          await FirebaseFirestore.instance
+              .collection('incomes')
+              .doc(incomeID)
+              .set({
+            'commission': fixedRate * 0.05,
+            'receivedAmount': receivedAmount,
+            'receiver': supplier.id,
+            'sender': clientDoc.id,
+            'incomeType': incomeType,
+            'transactionID': transactionDoc.id
+          });
+        }
+      }
+      //  The submitted payment is rejected
+      else {
+        //  Delete the transaction document
+        await FirebaseFirestore.instance
+            .collection('transactions')
+            .doc(transactionDoc.id)
+            .delete();
+
+        for (var supplier in supplierDocs) {
+          print('Current Supplier: ${supplier.id}');
+          final supplierData = supplier.data() as Map<dynamic, dynamic>;
+          String serviceOffered = supplierData['offeredService'];
+          String serviceParameter = getServiceParameter(serviceOffered);
+          Map<dynamic, dynamic> currentSupplierMap =
+              eventData[serviceParameter];
+          String status = currentSupplierMap['status'];
+          print('STATUS: $status');
+
+          //  Select the affected transaction and make it empty
+          String affectedTransaction = '';
+          if (status == 'PROCESSING DOWN PAYMENT') {
+            affectedTransaction = 'downPaymentTransaction';
+          } else if (status == 'PROCESSING COMPLETION PAYMENT') {
+            affectedTransaction = 'completionPaymentTransaction';
+          }
+          currentSupplierMap[affectedTransaction] = '';
+
+          //  Change the local values of the current supplier map.
+          if (status == 'PROCESSING DOWN PAYMENT')
+            currentSupplierMap['status'] = 'PENDING DOWN PAYMENT';
+          else if (status == 'PROCESSING COMPLETION PAYMENT')
+            currentSupplierMap['status'] = 'PENDING COMPLETION PAYMENT';
+          print('Changing service parameter: $serviceParameter');
+          await FirebaseFirestore.instance
+              .collection('events')
+              .doc(currentEventID)
+              .update({serviceParameter: currentSupplierMap});
+        }
+
+        //  Delete the proof of payment
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child('transactions')
+            .child('payment')
+            .child(transactionDoc.id);
+        await storageRef.delete();
+      }
+
+      //  Time to refresh the page
+      getPendingPayments();
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Error handling payment submission: $error')));
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -222,10 +363,22 @@ class _HandlePaymentScreenState extends State<HandlePaymentScreen> {
                   DocumentSnapshot clientDoc = associatedUserDocs
                       .where((member) => member.id == requestData['user'])
                       .first;
-                  DocumentSnapshot supplierDoc = associatedUserDocs
-                      .where((member) => member.id == requestData['receiver'])
-                      .first;
-                  return _paymentRequestEntry(clientDoc, supplierDoc, request);
+                  if (requestData['transactionType'] == 'DOWN PAYMENT' ||
+                      requestData['transactionType'] == 'COMPLETION PAYMENT') {
+                    DocumentSnapshot supplierDoc = associatedUserDocs
+                        .where((member) => member.id == requestData['receiver'])
+                        .first;
+                    return _paymentRequestEntry(
+                        clientDoc, supplierDoc, request);
+                  } else {
+                    List<DocumentSnapshot> supplierDocs =
+                        associatedUserDocs.where((member) {
+                      List<dynamic> receivers = requestData['receivers'];
+                      return receivers.contains(member.id);
+                    }).toList();
+                    return _multiplePaymentRequestEntry(
+                        clientDoc, supplierDocs, request);
+                  }
                 }).toList(),
               ))
             : comicNeueText(
@@ -308,6 +461,122 @@ class _HandlePaymentScreenState extends State<HandlePaymentScreen> {
                           backgroundColor: CustomColors.sweetCorn),
                       onPressed: () => handlePaymentSubmission(
                           clientDoc, supplierDoc, transactionDoc, false),
+                      child: comicNeueText(
+                          label: 'REJECT',
+                          color: CustomColors.midnightExtress,
+                          fontWeight: FontWeight.bold)),
+                )
+              ]),
+              SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: ElevatedButton(
+                    onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                            backgroundColor: Colors.black,
+                            content: Image.network(proofOfPayment))),
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.white),
+                    child: comicNeueText(
+                        label: 'VIEW PROOF OF PAYMENT',
+                        color: CustomColors.midnightExtress,
+                        fontWeight: FontWeight.w800),
+                  ))
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _multiplePaymentRequestEntry(DocumentSnapshot clientDoc,
+      List<DocumentSnapshot> supplierDocs, DocumentSnapshot transactionDoc) {
+    final clientData = clientDoc.data() as Map<dynamic, dynamic>;
+    String formattedClientName =
+        '${clientData['firstName']} ${clientData['lastName']}';
+    /*final supplierData = supplierDoc.data() as Map<dynamic, dynamic>;
+    String formattedSupplierName =
+        '${supplierData['firstName']} ${supplierData['lastName']}';*/
+    final transactionData = transactionDoc.data() as Map<dynamic, dynamic>;
+    String transactionType = transactionData['transactionType'];
+    String proofOfPayment = transactionData['proofOfPayment'];
+    double amount = transactionData['amount'];
+    return Padding(
+      padding: EdgeInsets.all(5),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.85,
+        decoration: BoxDecoration(color: CustomColors.midnightExtress),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: Column(
+            children: [
+              comicNeueText(
+                  label: 'TRANSACTION TYPE: ',
+                  textAlign: TextAlign.center,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25),
+              comicNeueText(
+                  label: transactionType,
+                  textAlign: TextAlign.center,
+                  color: Colors.white,
+                  fontSize: 25),
+              Gap(20),
+              comicNeueText(
+                  label: 'SENDER: $formattedClientName',
+                  textAlign: TextAlign.center,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20),
+              Gap(10),
+              comicNeueText(
+                  label: 'RECEIVERS:',
+                  textAlign: TextAlign.center,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20),
+              Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: supplierDocs.map((supplier) {
+                    final supplierData =
+                        supplier.data() as Map<dynamic, dynamic>;
+                    String formattedName =
+                        '${supplierData['firstName']} ${supplierData['lastName']}';
+                    String offeredService = supplierData['offeredService'];
+                    return comicNeueText(
+                        label: '$offeredService: $formattedName',
+                        textAlign: TextAlign.center,
+                        color: Colors.white,
+                        fontSize: 17);
+                  }).toList()),
+              vertical10Pix(
+                child: comicNeueText(
+                    label: 'PAID AMOUNT: PHP ${formatPrice(amount)}',
+                    textAlign: TextAlign.center,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20),
+              ),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                SizedBox(
+                  width: 80,
+                  child: ElevatedButton(
+                      onPressed: () => handleMultiplePaymentSubmission(
+                          clientDoc, supplierDocs, transactionDoc, true),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: CustomColors.sweetCorn),
+                      child: comicNeueText(
+                          label: 'ACCEPT',
+                          color: CustomColors.midnightExtress,
+                          fontWeight: FontWeight.bold)),
+                ),
+                SizedBox(
+                  width: 80,
+                  child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: CustomColors.sweetCorn),
+                      onPressed: () => handleMultiplePaymentSubmission(
+                          clientDoc, supplierDocs, transactionDoc, false),
                       child: comicNeueText(
                           label: 'REJECT',
                           color: CustomColors.midnightExtress,

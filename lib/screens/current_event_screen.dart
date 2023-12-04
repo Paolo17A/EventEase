@@ -356,7 +356,7 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
                                   paymentStatus ==
                                       'PROCESSING COMPLETION PAYMENT')
                                 comicNeueText(
-                                    label: 'PHP $formatPrice(fixedRate / 2)',
+                                    label: 'PHP ${formatPrice(fixedRate / 2)}',
                                     fontSize: 20),
                               Gap(20)
                             ],
@@ -387,7 +387,7 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
                           children: [
                             comicNeueText(
                                 label:
-                                    'Your have X days to settle the down payment.',
+                                    'Your have ${eventDate.difference(DateTime.now()).inDays} days to settle the completion payment.',
                                 textAlign: TextAlign.center,
                                 color: CustomColors.midnightExtress,
                                 fontSize: 18),
@@ -401,8 +401,12 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
                                       serviceOffered: offeredService,
                                       supplierID: supplierDoc.id);
                                 },
-                                child: Text('SETTLE DOWN PAYMENT',
-                                    style: buttonSweetCornStyle())),
+                                child: comicNeueText(
+                                    label: 'SETTLE COMPLETION PAYMENT',
+                                    color: CustomColors.sweetCorn,
+                                    fontWeight: FontWeight.bold,
+                                    textAlign: TextAlign.center,
+                                    fontSize: 20)),
                           ],
                         )
                       else if (paymentStatus == 'PROCESSING COMPLETION PAYMENT')
