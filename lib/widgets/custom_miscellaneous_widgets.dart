@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_ease/utils/navigator_util.dart';
 import 'package:event_ease/widgets/custom_padding_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../utils/colors_util.dart';
+import '../utils/custom_string_util.dart';
 import 'custom_button_widgets.dart';
 import 'custom_styling_widgets.dart';
 import 'event_ease_textfield_widget.dart';
@@ -312,6 +314,7 @@ Widget randomSupplierData(BuildContext context,
       '${supplierData['firstName']} ${supplierData['lastName']}';
   double fixedRate = supplierData['fixedRate'];
   String offeredService = supplierData['offeredService'];
+  String location = supplierData['location'];
   return Container(
     width: MediaQuery.of(context).size.width,
     decoration: BoxDecoration(
@@ -331,9 +334,9 @@ Widget randomSupplierData(BuildContext context,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 comicNeueText(label: 'NAME: $formattedName', fontSize: 22),
+                comicNeueText(label: 'LOCATION: $location', fontSize: 22),
                 comicNeueText(
-                    label: 'RATE: PHP ${fixedRate.toStringAsFixed(2)}',
-                    fontSize: 22),
+                    label: 'RATE: PHP ${formatPrice(fixedRate)}', fontSize: 22),
               ],
             )
           ],
@@ -341,4 +344,92 @@ Widget randomSupplierData(BuildContext context,
       ],
     ),
   );
+}
+
+Widget FAQEntry(BuildContext context,
+    {required String FAQID,
+    required String question,
+    required String answer,
+    required bool isAdmin,
+    Function? onDelete}) {
+  return all20Pix(
+      child: ExpansionTile(
+    collapsedShape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    collapsedBackgroundColor: CustomColors.midnightExtress,
+    backgroundColor: CustomColors.midnightExtress,
+    textColor: CustomColors.sweetCorn,
+    collapsedTextColor: CustomColors.sweetCorn,
+    title: comicNeueText(label: question, fontWeight: FontWeight.bold),
+    children: <Widget>[
+      ListTile(
+          title: Column(
+        children: [
+          comicNeueText(label: answer, color: Colors.white),
+          if (isAdmin)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.3,
+                  child: ElevatedButton(
+                      onPressed: () =>
+                          NavigatorRoutes.editFAQ(context, FAQID: FAQID),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: CustomColors.sweetCorn),
+                      child: comicNeueText(
+                          label: 'EDIT FAQ',
+                          color: CustomColors.midnightExtress,
+                          fontWeight: FontWeight.bold)),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.3,
+                  child: ElevatedButton(
+                      onPressed: () {
+                        if (onDelete != null) {
+                          showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                    content: SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.8,
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.3,
+                                        child: comicNeueText(
+                                            label:
+                                                'Are you sure you want to delete this FAQ?',
+                                            fontSize: 18)),
+                                    actions: [
+                                      ElevatedButton(
+                                          onPressed: () =>
+                                              Navigator.of(context).pop(),
+                                          child:
+                                              comicNeueText(label: 'Go Back')),
+                                      ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            onDelete();
+                                          },
+                                          child: comicNeueText(
+                                              label: 'Delete FAQ'))
+                                    ],
+                                  ));
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: CustomColors.sweetCorn),
+                      child: comicNeueText(
+                          label: 'DELETE FAQ',
+                          color: CustomColors.midnightExtress,
+                          fontWeight: FontWeight.bold)),
+                )
+              ],
+            )
+        ],
+      )),
+    ],
+  ));
 }

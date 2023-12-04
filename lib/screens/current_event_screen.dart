@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
+import '../utils/custom_string_util.dart';
+
 class CurrentEventScreen extends StatefulWidget {
   const CurrentEventScreen({super.key});
 
@@ -111,6 +113,28 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
     }
   }
 
+  bool eligibleForPayAllAtOnce() {
+    bool pendingCatering = cateringStatus == 'PENDING DOWN PAYMENT' ||
+        cateringStatus == 'PENDING COMPLETION PAYMENT';
+    bool pendingCosmetologist = cosmetologistStatus == 'PENDING DOWN PAYMENT' ||
+        cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
+    bool pendingGuestPlace = guestPlace == 'PENDING DOWN PAYMENT' ||
+        cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
+    bool pendingHost = hostStatus == 'PENDING DOWN PAYMENT' ||
+        cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
+    bool pendingPhotographer = photographerStatus == 'PENDING DOWN PAYMENT' ||
+        cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
+    bool pendingTechnician = technicianStatus == 'PENDING DOWN PAYMENT' ||
+        cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
+
+    return pendingCatering ||
+        pendingCosmetologist ||
+        pendingGuestPlace ||
+        pendingHost ||
+        pendingPhotographer ||
+        pendingTechnician;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,7 +147,8 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
               _eventDetailsContainer(),
               Divider(thickness: 2, color: CustomColors.midnightExtress),
               _currentSuppliersContainer(),
-              _editEventButton()
+              _editEventButton(),
+              if (eligibleForPayAllAtOnce()) _settleAllPaymentsButton()
             ],
           )),
     );
@@ -224,8 +249,9 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
                           fontSize: 23,
                           fontWeight: FontWeight.w900),
                       comicNeueText(
-                          label: 'Price: ${supplierData['fixedRate']}',
-                          fontSize: 23,
+                          label:
+                              'Price: PHP ${formatPrice(supplierData['fixedRate'])}',
+                          fontSize: 20,
                           fontWeight: FontWeight.w500,
                           color: CustomColors.midnightExtress),
                       comicNeueText(
@@ -243,14 +269,31 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
   }
 
   Widget _editEventButton() {
-    return ElevatedButton(
-        onPressed: () => Navigator.of(context)
-            .pushReplacementNamed(NavigatorRoutes.editService),
-        child: comicNeueText(
-            label: 'Edit Event',
-            fontSize: 21,
-            color: CustomColors.sweetCorn,
-            fontWeight: FontWeight.bold));
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.65,
+      child: ElevatedButton(
+          onPressed: () =>
+              Navigator.of(context).pushNamed(NavigatorRoutes.editService),
+          child: comicNeueText(
+              label: 'Add Supplier',
+              fontSize: 21,
+              color: CustomColors.sweetCorn,
+              fontWeight: FontWeight.bold)),
+    );
+  }
+
+  Widget _settleAllPaymentsButton() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.65,
+      child: ElevatedButton(
+          onPressed: () => Navigator.of(context)
+              .pushNamed(NavigatorRoutes.settleMultiplePayments),
+          child: comicNeueText(
+              label: 'Settle All Payments',
+              fontSize: 21,
+              color: CustomColors.sweetCorn,
+              fontWeight: FontWeight.bold)),
+    );
   }
 
   void displayCurrentSupplierData(
@@ -302,18 +345,18 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
                                   label: offeredService, fontSize: 20),
                               Gap(15),
                               comicNeueText(
-                                  label: 'Total Paid Amount: ',
+                                  label: 'Total Paid Amount:',
                                   fontWeight: FontWeight.bold,
                                   fontSize: 25),
                               if (paymentStatus == 'PENDING DOWN PAYMENT' ||
                                   paymentStatus == 'PROCESSING DOWN PAYMENT')
-                                comicNeueText(label: '0.00', fontSize: 20)
+                                comicNeueText(label: 'PHP 0.00', fontSize: 20)
                               else if (paymentStatus ==
                                       'PENDING COMPLETION PAYMENT' ||
                                   paymentStatus ==
                                       'PROCESSING COMPLETION PAYMENT')
                                 comicNeueText(
-                                    label: (fixedRate / 2).toStringAsFixed(2),
+                                    label: 'PHP $formatPrice(fixedRate / 2)',
                                     fontSize: 20),
                               Gap(20)
                             ],

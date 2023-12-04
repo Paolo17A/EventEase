@@ -109,7 +109,8 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
       roundedImageButton(context,
           label: 'Help Center',
           imagePath: 'assets/images/Help Center.png',
-          onPress: () {})
+          onPress: () =>
+              Navigator.of(context).pushNamed(NavigatorRoutes.viewFAQs))
     ]);
   }
 }

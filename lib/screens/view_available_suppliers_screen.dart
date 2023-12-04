@@ -128,7 +128,8 @@ class _ViewAvailableSuppliersScreenState
           bool hasMatchingDate = false;
           for (var eventDoc in customerCurrentEventDocs) {
             final currentEventData = eventDoc.data();
-            DateTime currentEventDate = currentEventData['eventDate'];
+            DateTime currentEventDate =
+                (currentEventData['eventDate'] as Timestamp).toDate();
             if (isSameDate(currentEventDate)) {
               hasMatchingDate = true;
               break;
@@ -204,6 +205,7 @@ class _ViewAvailableSuppliersScreenState
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisSpacing: 20,
                         mainAxisSpacing: 20,
+                        childAspectRatio: 0.8,
                         crossAxisCount: 2),
                     itemCount: availableSuppliers.length,
                     itemBuilder: (context, index) {
@@ -226,6 +228,7 @@ class _ViewAvailableSuppliersScreenState
     String formattedName =
         '${supplierData['firstName']} ${supplier['lastName']}';
     String intro = supplierData['introduction'];
+    String location = supplierData['location'];
     return ElevatedButton(
         onPressed: () =>
             NavigatorRoutes.selectedSupplier(context, supplierUID: supplier.id),
@@ -242,7 +245,17 @@ class _ViewAvailableSuppliersScreenState
                 fontSize: 22,
                 fontWeight: FontWeight.bold),
             Gap(10),
-            comicNeueText(label: intro, color: Colors.white)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                comicNeueText(
+                    label: intro,
+                    color: Colors.white,
+                    overflow: TextOverflow.ellipsis),
+                Gap(6),
+                comicNeueText(label: 'Location: $location', color: Colors.white)
+              ],
+            )
           ],
         ));
   }

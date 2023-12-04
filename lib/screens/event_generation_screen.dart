@@ -41,6 +41,11 @@ class _EventGenerationScreenState extends State<EventGenerationScreen> {
                     seedColor: CustomColors.midnightExtress)),
             child: child!));
     if (picked != null && picked != DateTime.now()) {
+      if (picked.difference(DateTime.now()).inDays < 45) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Event date must be at least 45 days from now.')));
+        return;
+      }
       setState(() {
         _selectedDate = picked;
       });
@@ -123,7 +128,7 @@ class _EventGenerationScreenState extends State<EventGenerationScreen> {
         onPressed: selectDateTime,
         child: comicNeueText(
             label: _selectedDate != null
-                ? DateFormat('dd MMM yyyy').format(_selectedDate!)
+                ? DateFormat('MMM dd, yyyy').format(_selectedDate!)
                 : 'Select Date of Event',
             color: CustomColors.sweetCorn,
             fontWeight: FontWeight.bold,

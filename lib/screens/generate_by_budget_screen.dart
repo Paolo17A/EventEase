@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
+import '../utils/custom_string_util.dart';
 import '../widgets/custom_styling_widgets.dart';
 
 class GenerateByBudgetScreen extends StatefulWidget {
@@ -376,7 +377,7 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
           Column(
             children: [
               midnightBGHeaderText(context,
-                  label: 'Budget: PHP ${widget.budget.toStringAsFixed(2)}'),
+                  label: 'Budget: PHP ${formatPrice(widget.budget)}'),
               _generatedSuppliersContainer()
             ],
           )),

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 
+import '../utils/custom_string_util.dart';
 import '../widgets/custom_styling_widgets.dart';
 
 class TransactionHistoryScreen extends StatefulWidget {
@@ -91,7 +92,6 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
         (transactionData['dateCreated'] as Timestamp).toDate();
     DateTime dateSettled =
         (transactionData['dateSettled'] as Timestamp).toDate();
-    //bool hasReceiver = transactionData.containsKey('receiver');
 
     return vertical10Pix(
         child: Container(
@@ -107,7 +107,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               fontSize: 20),
           Gap(5),
           comicNeueText(
-              label: 'Paid Amount: ${amount.toStringAsFixed(2)}',
+              label: 'Paid Amount: PHP ${formatPrice(amount)}',
               fontWeight: FontWeight.bold,
               fontSize: 20),
           Gap(15),

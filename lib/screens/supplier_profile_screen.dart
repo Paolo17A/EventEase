@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../utils/colors_util.dart';
+import '../utils/custom_string_util.dart';
 import '../utils/firebase_util.dart';
 import '../widgets/app_bottom_navbar_widget.dart';
 import '../widgets/custom_padding_widgets.dart';
@@ -24,6 +25,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
   String profileImageURL = '';
   String formattedName = '';
   String _businessName = '';
+  String _location = '';
   List<dynamic> _portfolioImages = [];
   String _introduction = '';
   double _fixedRate = 0.0;
@@ -44,6 +46,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
       profileImageURL = userData['profileImageURL'];
       formattedName = '${userData['firstName']} ${userData['lastName']}';
       _businessName = userData['businessName'];
+      _location = userData['location'];
       _portfolioImages = userData['portfolio'];
       _introduction = userData['introduction'];
       _fixedRate = userData['fixedRate'];
@@ -121,6 +124,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
         children: [
           buildProfileImageWidget(profileImageURL: profileImageURL, radius: 70),
           _formattedNameWidget(),
+          _locationWidget(),
           _businessNameWidget(),
           _portfolioSelection(),
           _introductionWidget(),
@@ -145,6 +149,26 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
                   fontSize: 18,
                   fontWeight: FontWeight.bold),
               comicNeueText(label: formattedName, fontSize: 18)
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _locationWidget() {
+    return Row(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              comicNeueText(
+                  label: 'Location:',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+              comicNeueText(label: _location, fontSize: 18)
             ],
           ),
         ),
@@ -203,7 +227,7 @@ class _SupplierProfileScreenState extends State<SupplierProfileScreen> {
                   fontSize: 18,
                   fontWeight: FontWeight.bold),
               comicNeueText(
-                  label: 'PHP ${_fixedRate.toStringAsFixed(2)}', fontSize: 18)
+                  label: 'PHP ${formatPrice(_fixedRate)}', fontSize: 18)
             ],
           ),
         ),

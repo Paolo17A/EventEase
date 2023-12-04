@@ -44,6 +44,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen> {
                 isEqualTo: FirebaseAuth.instance.currentUser!.uid)
             .get();
         associatedEvents = currentEvents.docs;
+        associatedEvents = associatedEvents.reversed.toList();
       }
       //  Current user is a supplier
       else {
@@ -53,6 +54,7 @@ class _EventHistoryScreenState extends State<EventHistoryScreen> {
             .where(FieldPath.documentId, whereIn: currentEvents)
             .get();
         associatedEvents = events.docs;
+        associatedEvents = associatedEvents.reversed.toList();
       }
       setState(() {
         _isLoading = false;

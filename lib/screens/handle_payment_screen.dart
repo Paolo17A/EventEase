@@ -282,7 +282,7 @@ class _HandlePaymentScreenState extends State<HandlePaymentScreen> {
                   fontSize: 20),
               vertical10Pix(
                 child: comicNeueText(
-                    label: 'PAID AMOUNT: PHP ${amount.toStringAsFixed(2)}',
+                    label: 'PAID AMOUNT: PHP ${formatPrice(amount)}',
                     textAlign: TextAlign.center,
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

@@ -30,6 +30,7 @@ class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
   ImagePicker imagePicker = ImagePicker();
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
+  final locationController = TextEditingController();
 
   @override
   void didChangeDependencies() {
@@ -44,6 +45,7 @@ class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
       profileImageURL = userData['profileImageURL'];
       firstNameController.text = userData['firstName'];
       lastNameController.text = userData['lastName'];
+      locationController.text = userData['location'];
       setState(() {
         _isLoading = false;
         _isInitialized = true;
@@ -139,6 +141,7 @@ class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
           .update({
         'firstName': firstNameController.text,
         'lastName': lastNameController.text,
+        'location': locationController.text
       });
 
       scaffoldMessenger.showSnackBar(
@@ -188,6 +191,8 @@ class _EditClientProfileScreenState extends State<EditClientProfileScreen> {
                         label: 'First Name', controller: firstNameController),
                     labelledTextField(context,
                         label: 'Last Name', controller: lastNameController),
+                    labelledTextField(context,
+                        label: 'Location', controller: locationController),
                     Gap(60),
                     submitButton(context,
                         label: 'SAVE CHANGES', onPress: updateProfile)

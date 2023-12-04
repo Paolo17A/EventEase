@@ -7,6 +7,7 @@ import 'package:event_ease/widgets/profile_app_bar_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/custom_string_util.dart';
 import '../utils/navigator_util.dart';
 import '../widgets/custom_styling_widgets.dart';
 
@@ -146,12 +147,12 @@ class _IncomeHistoryScreenState extends State<IncomeHistoryScreen> {
                       fontSize: 20),
                   comicNeueText(
                       label:
-                          'Receivable Amount: ${receivedAmount.toStringAsFixed(2)}',
+                          'Receivable Amount: PHP ${formatPrice(receivedAmount)}',
                       color: CustomColors.midnightExtress,
                       fontSize: 13),
                   comicNeueText(
                       label:
-                          'Platform Commission: ${commission.toStringAsFixed(2)}',
+                          'Platform Commission: PHP ${formatPrice(commission)}',
                       color: CustomColors.midnightExtress,
                       fontSize: 13),
                 ],

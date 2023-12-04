@@ -24,6 +24,7 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
   bool _isLoading = true;
   String profileImageURL = '';
   String formattedName = '';
+  String _location = '';
   String _businessName = '';
   List<dynamic> _portfolioImages = [];
   String _introduction = '';
@@ -43,6 +44,7 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
       final userData = await getThisUserData(widget.supplierUID);
       profileImageURL = userData['profileImageURL'];
       formattedName = '${userData['firstName']} ${userData['lastName']}';
+      _location = userData['location'];
       _businessName = userData['businessName'];
       _portfolioImages = userData['portfolio'];
       _introduction = userData['introduction'];
@@ -139,6 +141,7 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
                     buildProfileImageWidget(
                         profileImageURL: profileImageURL, radius: 70),
                     _businessNameWidget(),
+                    _locationWidget(),
                     _portfolioSelection(),
                     _introductionWidget(),
                     _fixedRateWidget(),
@@ -183,6 +186,26 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
     );
   }
 
+  Widget _locationWidget() {
+    return Row(
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              comicNeueText(
+                  label: 'Location:',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
+              comicNeueText(label: _location, fontSize: 18)
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _introductionWidget() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 10),
@@ -214,7 +237,7 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
                   fontSize: 18,
                   fontWeight: FontWeight.bold),
               comicNeueText(
-                  label: 'PHP ${_fixedRate.toStringAsFixed(2)}', fontSize: 18)
+                  label: 'PHP ${formatPrice(_fixedRate)}', fontSize: 18)
             ],
           ),
         ),

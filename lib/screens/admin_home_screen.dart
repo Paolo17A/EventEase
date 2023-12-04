@@ -33,32 +33,38 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           body: SizedBox(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
-            child: all20Pix(
-                child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _adminHomeButton(
-                    onPress: () => Navigator.of(context)
-                        .pushNamed(NavigatorRoutes.membershipRequests),
-                    label: 'MEMBERSHIP REQUESTS'),
-                _adminHomeButton(
-                    onPress: () => Navigator.of(context)
-                        .pushNamed(NavigatorRoutes.premiumRequests),
-                    label: 'PREMIUM RENEWAL REQUESTS'),
-                _adminHomeButton(
-                    onPress: () => Navigator.of(context)
-                        .pushNamed(NavigatorRoutes.handlePayments),
-                    label: 'SERVICE TRANSACTIONS'),
-                _adminHomeButton(onPress: () {}, label: 'CASH-OUT REQUESTS'),
-              ],
-            )),
+            child: SingleChildScrollView(
+              child: all20Pix(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _adminHomeButton(
+                      onPress: () => Navigator.of(context)
+                          .pushNamed(NavigatorRoutes.membershipRequests),
+                      label: 'MEMBERSHIP REQUESTS'),
+                  _adminHomeButton(
+                      onPress: () => Navigator.of(context)
+                          .pushNamed(NavigatorRoutes.premiumRequests),
+                      label: 'PREMIUM RENEWAL REQUESTS'),
+                  _adminHomeButton(
+                      onPress: () => Navigator.of(context)
+                          .pushNamed(NavigatorRoutes.handlePayments),
+                      label: 'SERVICE TRANSACTIONS'),
+                  _adminHomeButton(onPress: () {}, label: 'CASH-OUT REQUESTS'),
+                  _adminHomeButton(
+                      onPress: () => Navigator.of(context)
+                          .pushNamed(NavigatorRoutes.viewFAQs),
+                      label: 'FAQS'),
+                ],
+              )),
+            ),
           )),
     );
   }
 
   Widget _adminHomeButton({required Function onPress, required String label}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 15),
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.85,
         height: 100,

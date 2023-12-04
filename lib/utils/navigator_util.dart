@@ -1,3 +1,4 @@
+import 'package:event_ease/screens/edit_faq_screen.dart';
 import 'package:event_ease/screens/event_generation_screen.dart';
 import 'package:event_ease/screens/generate_by_budget_screen.dart';
 import 'package:event_ease/screens/generate_by_guest_count_screen.dart';
@@ -12,6 +13,7 @@ class NavigatorRoutes {
   static const String settleMembershipFee = '/settleMembershipFee';
   static const String feedbackHistory = '/feedbackHistory';
   static const String eventHistory = '/eventHistory';
+  static const String viewFAQs = '/viewFAQs';
 
   //  CLIENT
   static const String clientLogin = '/clientLogin';
@@ -24,6 +26,8 @@ class NavigatorRoutes {
   static const String addService = '/addService';
   static const String transactionHistory = '/transactionHistory';
   static const String editService = '/editService';
+  static const String clientCalendar = '/clientCalendar';
+  static const String settleMultiplePayments = '/settleMultiplePayments';
 
   //  SUPPLIER
   static const String supplierLogin = '/supplierLogin';
@@ -41,6 +45,7 @@ class NavigatorRoutes {
   static const String membershipRequests = '/membershipRequests';
   static const String premiumRequests = '/premiumRequests';
   static const String handlePayments = '/handlePayments';
+  static const String addFAQ = '/addFAQ';
 
   static void eventGeneration(BuildContext context,
       {required String eventType}) {
@@ -95,5 +100,10 @@ class NavigatorRoutes {
             eventDate: eventDate,
             guestCount: guestCount,
             eventType: eventType)));
+  }
+
+  static void editFAQ(BuildContext context, {required String FAQID}) {
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => EditFAQScreen(FAQID: FAQID)));
   }
 }

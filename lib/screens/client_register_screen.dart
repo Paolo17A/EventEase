@@ -23,6 +23,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen> {
 
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _locationController = TextEditingController();
 
   void registerNewUser() async {
     FocusScope.of(context).unfocus();
@@ -78,6 +79,7 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen> {
         'availedSuppliers': [],
         'transactionHistory': [],
         'feedbackHistory': [],
+        'location': _locationController.text,
         'membershipPayment': '',
       });
       await FirebaseAuth.instance.signOut();
@@ -117,6 +119,9 @@ class _ClientRegisterScreenState extends State<ClientRegisterScreen> {
                         controller: _firstNameController),
                     labelledTextField(context,
                         label: 'Last\nName: ', controller: _lastNameController),
+                    const Gap(20),
+                    labelledTextField(context,
+                        label: 'Location: ', controller: _locationController),
                     submitButton(context,
                         label: 'CREATE YOUR ACCOUNT',
                         onPress: () => registerNewUser()),

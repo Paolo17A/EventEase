@@ -30,6 +30,8 @@ class _EditSupplierProfileScreenState extends State<EditSupplierProfileScreen> {
   String profileImageURL = '';
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
+  final locationController = TextEditingController();
+
   final businessNameController = TextEditingController();
   List<dynamic> networkPortfolioImages = [];
   final introductionController = TextEditingController();
@@ -51,6 +53,8 @@ class _EditSupplierProfileScreenState extends State<EditSupplierProfileScreen> {
       firstNameController.text = userData['firstName'];
       lastNameController.text = userData['lastName'];
       businessNameController.text = userData['businessName'];
+      locationController.text = userData['location'];
+
       networkPortfolioImages = userData['portfolio'];
       introductionController.text = userData['introduction'];
       fixedRateController.text = userData['fixedRate'].toString();
@@ -215,6 +219,7 @@ class _EditSupplierProfileScreenState extends State<EditSupplierProfileScreen> {
         'firstName': firstNameController.text,
         'lastName': lastNameController.text,
         'businessName': businessNameController.text,
+        'location': locationController.text,
         'introduction': introductionController.text,
         'fixedRate': double.parse(fixedRateController.text),
         'maxCapacity': int.parse(maxCapacityController.text),
@@ -269,6 +274,8 @@ class _EditSupplierProfileScreenState extends State<EditSupplierProfileScreen> {
                 labelledTextField(context,
                     label: 'Business\nName:',
                     controller: businessNameController),
+                labelledTextField(context,
+                    label: 'Location: ', controller: locationController),
                 _portfolioSelection(),
                 multiLineField(context,
                     label: 'Introduction:', controller: introductionController),

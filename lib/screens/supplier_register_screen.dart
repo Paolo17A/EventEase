@@ -34,6 +34,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
 
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _locationController = TextEditingController();
 
   String _selectedService = '';
 
@@ -68,6 +69,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
         'password': _passwordController.text,
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
+        'location': _locationController.text,
         'offeredService': _selectedService,
         'businessName': _businessNameController.text,
         'profileImageURL': '',
@@ -297,6 +299,9 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
             label: 'First\nName: ', controller: _firstNameController),
         labelledTextField(context,
             label: 'Last\nName: ', controller: _lastNameController),
+        const Gap(20),
+        labelledTextField(context,
+            label: 'Location: ', controller: _locationController),
         submitButton(context, label: 'NEXT', onPress: () => handleNextButton()),
       ],
     ));
