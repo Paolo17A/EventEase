@@ -5,20 +5,35 @@ import 'package:event_ease/utils/custom_containers_widget.dart';
 import 'package:event_ease/widgets/profile_app_bar_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 import '../utils/navigator_util.dart';
 import '../widgets/custom_miscellaneous_widgets.dart';
+import '../widgets/custom_padding_widgets.dart';
+import '../widgets/custom_styling_widgets.dart';
 
 class GenerateByGuestCountScreen extends StatefulWidget {
   final DateTime eventDate;
   final int guestCount;
   final String eventType;
-
-  const GenerateByGuestCountScreen(
-      {super.key,
-      required this.eventDate,
-      required this.guestCount,
-      required this.eventType});
+  final bool hasCatering;
+  final bool hasCosmetologist;
+  final bool hasGuestPlace;
+  final bool hasHost;
+  final bool hasPhotographer;
+  final bool hasTechnician;
+  const GenerateByGuestCountScreen({
+    super.key,
+    required this.eventDate,
+    required this.guestCount,
+    required this.eventType,
+    required this.hasCatering,
+    required this.hasCosmetologist,
+    required this.hasGuestPlace,
+    required this.hasHost,
+    required this.hasPhotographer,
+    required this.hasTechnician,
+  });
 
   @override
   State<GenerateByGuestCountScreen> createState() =>
@@ -42,6 +57,12 @@ class _GenerateByGuestCountScreenState
   DocumentSnapshot? randomTechnician;
   DocumentSnapshot? randomPhotographer;
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    getEligibleSuppliers();
+  }
+
   void getEligibleSuppliers() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     try {
@@ -57,19 +78,23 @@ class _GenerateByGuestCountScreenState
         });
         return;
       }
-
-      availableCaterers = await getAvailableSuppliers('CATERING');
-      availableCosmetologists = await getAvailableSuppliers('COSMETOLOGIST');
-      availableGuestPlaces = await getAvailableSuppliers('GUEST\'S PLACE');
-      availableHosts = await getAvailableSuppliers('HOST');
-      availableTechnicians =
-          await getAvailableSuppliers('LIGHT AND SOUND TECHNICIAN');
-      availablePhotographers =
-          await getAvailableSuppliers('PHOTOGRAPHER AND VIDEOGRAPHER');
+      if (widget.hasCatering)
+        availableCaterers = await getAvailableSuppliers('CATERING');
+      if (widget.hasCosmetologist)
+        availableCosmetologists = await getAvailableSuppliers('COSMETOLOGIST');
+      if (widget.hasGuestPlace)
+        availableGuestPlaces = await getAvailableSuppliers('GUEST\'S PLACE');
+      if (widget.hasHost) availableHosts = await getAvailableSuppliers('HOST');
+      if (widget.hasTechnician)
+        availableTechnicians =
+            await getAvailableSuppliers('LIGHT AND SOUND TECHNICIAN');
+      if (widget.hasPhotographer)
+        availablePhotographers =
+            await getAvailableSuppliers('PHOTOGRAPHER AND VIDEOGRAPHER');
 
       availableCaterers = availableCaterers.where((supplier) {
         final supplierData = supplier.data() as Map<dynamic, dynamic>;
-        double maxCapacity = supplierData['maxCapacity'];
+        int maxCapacity = supplierData['maxCapacity'];
         return widget.guestCount <= maxCapacity;
       }).toList();
       randomCaterer = availableCaterers.isNotEmpty
@@ -77,7 +102,7 @@ class _GenerateByGuestCountScreenState
           : null;
       availableCosmetologists = availableCosmetologists.where((supplier) {
         final supplierData = supplier.data() as Map<dynamic, dynamic>;
-        double maxCapacity = supplierData['maxCapacity'];
+        int maxCapacity = supplierData['maxCapacity'];
         return widget.guestCount <= maxCapacity;
       }).toList();
       randomCosmetologist = availableCosmetologists.isNotEmpty
@@ -86,7 +111,7 @@ class _GenerateByGuestCountScreenState
           : null;
       availableGuestPlaces = availableGuestPlaces.where((supplier) {
         final supplierData = supplier.data() as Map<dynamic, dynamic>;
-        double maxCapacity = supplierData['maxCapacity'];
+        int maxCapacity = supplierData['maxCapacity'];
         return widget.guestCount <= maxCapacity;
       }).toList();
       randomGuestPlace = availableGuestPlaces.isNotEmpty
@@ -94,7 +119,7 @@ class _GenerateByGuestCountScreenState
           : null;
       availableHosts = availableHosts.where((supplier) {
         final supplierData = supplier.data() as Map<dynamic, dynamic>;
-        double maxCapacity = supplierData['maxCapacity'];
+        int maxCapacity = supplierData['maxCapacity'];
         return widget.guestCount <= maxCapacity;
       }).toList();
       randomHost = availableHosts.isNotEmpty
@@ -102,7 +127,7 @@ class _GenerateByGuestCountScreenState
           : null;
       availableTechnicians = availableTechnicians.where((supplier) {
         final supplierData = supplier.data() as Map<dynamic, dynamic>;
-        double maxCapacity = supplierData['maxCapacity'];
+        int maxCapacity = supplierData['maxCapacity'];
         return widget.guestCount <= maxCapacity;
       }).toList();
       randomTechnician = availableTechnicians.isNotEmpty
@@ -110,7 +135,7 @@ class _GenerateByGuestCountScreenState
           : null;
       availablePhotographers = availablePhotographers.where((supplier) {
         final supplierData = supplier.data() as Map<dynamic, dynamic>;
-        double maxCapacity = supplierData['maxCapacity'];
+        int maxCapacity = supplierData['maxCapacity'];
         return widget.guestCount <= maxCapacity;
       }).toList();
       randomPhotographer = availablePhotographers.isNotEmpty
@@ -270,8 +295,12 @@ class _GenerateByGuestCountScreenState
             .collection('users')
             .doc(randomCaterer!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -280,8 +309,12 @@ class _GenerateByGuestCountScreenState
             .collection('users')
             .doc(randomCosmetologist!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -290,8 +323,12 @@ class _GenerateByGuestCountScreenState
             .collection('users')
             .doc(randomGuestPlace!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -300,8 +337,12 @@ class _GenerateByGuestCountScreenState
             .collection('users')
             .doc(randomHost!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -310,8 +351,12 @@ class _GenerateByGuestCountScreenState
             .collection('users')
             .doc(randomPhotographer!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -320,8 +365,12 @@ class _GenerateByGuestCountScreenState
             .collection('users')
             .doc(randomPhotographer!.id)
             .update({
-          'randomTechnician':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
       //  Go back to event generation screen
@@ -349,6 +398,25 @@ class _GenerateByGuestCountScreenState
     }
   }
 
+  bool _mayGenerateEvent() {
+    bool mayCater = widget.hasCatering && availableCaterers.isNotEmpty;
+    bool mayCosmetics =
+        widget.hasCosmetologist && availableCosmetologists.isNotEmpty;
+    bool mayGuestPlace =
+        widget.hasGuestPlace && availableCosmetologists.isNotEmpty;
+    bool mayHost = widget.hasHost && availableHosts.isNotEmpty;
+    bool mayPhotographer =
+        widget.hasPhotographer && availablePhotographers.isNotEmpty;
+    bool mayTechnician =
+        widget.hasTechnician && availableTechnicians.isNotEmpty;
+    return mayCater ||
+        mayCosmetics ||
+        mayGuestPlace ||
+        mayHost ||
+        mayPhotographer ||
+        mayTechnician;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -359,8 +427,59 @@ class _GenerateByGuestCountScreenState
             children: [
               midnightBGHeaderText(context,
                   label: 'Guest Count: ${widget.guestCount}'),
+              _generatedSuppliersContainer()
             ],
           )),
+    );
+  }
+
+  Widget _generatedSuppliersContainer() {
+    return vertical10Pix(
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: eligibleSuppliers.isNotEmpty
+            ? SingleChildScrollView(
+                child: Column(
+                  children: [
+                    if (widget.hasCatering)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomCaterer,
+                          offeredService: 'CATERING'),
+                    if (widget.hasCosmetologist)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomCosmetologist,
+                          offeredService: 'COSMETOLOGIST'),
+                    if (widget.hasGuestPlace)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomGuestPlace,
+                          offeredService: 'GUEST\'S PLACE'),
+                    if (widget.hasHost)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomTechnician,
+                          offeredService: 'HOST'),
+                    if (widget.hasPhotographer)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomPhotographer,
+                          offeredService: 'PHOTOGRAPHER AND VIDEOGRAPHER'),
+                    if (widget.hasTechnician)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomHost,
+                          offeredService: 'LIGHT AND SOUND TECHNICIAN'),
+                    Gap(30),
+                    if (_mayGenerateEvent())
+                      ElevatedButton(
+                          onPressed: generateEventByGuestCount,
+                          child: Text('Generate This Event',
+                              style: buttonSweetCornStyle()))
+                  ],
+                ),
+              )
+            : comicNeueText(
+                label: 'NO ELIGIBLE SUPPLIERS AVAILABLE.',
+                fontWeight: FontWeight.bold,
+                fontSize: 45,
+                textAlign: TextAlign.center),
+      ),
     );
   }
 }

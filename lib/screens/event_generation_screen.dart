@@ -213,56 +213,201 @@ class _EventGenerationScreenState extends State<EventGenerationScreen> {
 
   void showInputBudgetDialog() {
     budgetController.clear();
+    bool hasCatering = false;
+    bool hasCosmetologist = false;
+    bool hasGuestPlace = false;
+    bool hasHost = false;
+    bool hasPhotographer = false;
+    bool hasTechnician = false;
     showDialog(
         context: context,
         builder: (context) => GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
-              child: AlertDialog(
-                shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                        color: CustomColors.midnightExtress, width: 2),
-                    borderRadius: BorderRadius.circular(10)),
-                content: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.75,
-                        child: comicNeueText(
-                            label: 'INPUT YOUR MAX BUDGET',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20),
-                      ),
-                      vertical10Pix(
-                        child: EventEaseTextField(
-                            text: '',
-                            controller: budgetController,
-                            textInputType:
-                                TextInputType.numberWithOptions(decimal: true)),
-                      ),
-                      Gap(50),
-                      ElevatedButton(
-                          onPressed: () {
-                            if (double.tryParse(budgetController.text) ==
-                                    null ||
-                                double.parse(budgetController.text) <= 0) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Please enter a valid amount higher than 0.00')));
-                              return;
-                            }
-                            Navigator.of(context).pop();
-                            NavigatorRoutes.generateByBudget(context,
-                                eventDate: _selectedDate!,
-                                budget: double.parse(budgetController.text),
-                                eventType: widget.eventType);
-                          },
-                          child: all20Pix(
-                            child: Text('GENERATE EVENT',
-                                style: buttonSweetCornStyle()),
-                          ))
-                    ],
+              child: StatefulBuilder(
+                builder: (context, setState) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color: CustomColors.midnightExtress, width: 2),
+                      borderRadius: BorderRadius.circular(10)),
+                  content: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    child: SingleChildScrollView(
+                      child: Column(children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.75,
+                          child: comicNeueText(
+                              label: 'INPUT YOUR MAX BUDGET',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20),
+                        ),
+                        vertical10Pix(
+                          child: EventEaseTextField(
+                              text: '',
+                              controller: budgetController,
+                              textInputType: TextInputType.numberWithOptions(
+                                  decimal: true)),
+                        ),
+                        Column(
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.75,
+                              child: comicNeueText(
+                                label: 'SELECT OPTIONS',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                            Column(
+                              children: [
+                                SizedBox(
+                                  height: 30,
+                                  child: CheckboxListTile(
+                                    title: comicNeueText(label: 'Catering'),
+                                    checkColor: CustomColors.sweetCorn,
+                                    activeColor: CustomColors.midnightExtress,
+                                    value: hasCatering,
+                                    onChanged: (bool? value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          hasCatering = value;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                  child: CheckboxListTile(
+                                    title:
+                                        comicNeueText(label: 'Cosmetologist'),
+                                    checkColor: CustomColors.sweetCorn,
+                                    activeColor: CustomColors.midnightExtress,
+                                    value: hasCosmetologist,
+                                    onChanged: (bool? value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          hasCosmetologist = value;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                  child: CheckboxListTile(
+                                    title:
+                                        comicNeueText(label: 'Guest\'s Place'),
+                                    checkColor: CustomColors.sweetCorn,
+                                    activeColor: CustomColors.midnightExtress,
+                                    value: hasGuestPlace,
+                                    onChanged: (bool? value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          hasGuestPlace = value;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                  child: CheckboxListTile(
+                                    title: comicNeueText(label: 'Host'),
+                                    checkColor: CustomColors.sweetCorn,
+                                    activeColor: CustomColors.midnightExtress,
+                                    value: hasHost,
+                                    onChanged: (bool? value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          hasHost = value;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                  child: CheckboxListTile(
+                                    title: comicNeueText(label: 'Photographer'),
+                                    checkColor: CustomColors.sweetCorn,
+                                    activeColor: CustomColors.midnightExtress,
+                                    value: hasPhotographer,
+                                    onChanged: (bool? value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          hasPhotographer = value;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 30,
+                                  child: CheckboxListTile(
+                                    title: comicNeueText(label: 'Technician'),
+                                    checkColor: CustomColors.sweetCorn,
+                                    activeColor: CustomColors.midnightExtress,
+                                    value: hasTechnician,
+                                    onChanged: (bool? value) {
+                                      if (value != null) {
+                                        setState(() {
+                                          hasTechnician = value;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Gap(30),
+                            ElevatedButton(
+                                onPressed: () {
+                                  if (double.tryParse(budgetController.text) ==
+                                          null ||
+                                      double.parse(budgetController.text) <=
+                                          0) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Please enter a valid amount higher than 0.00')));
+                                    return;
+                                  }
+                                  int serviceCount = 0;
+                                  if (hasCatering) serviceCount++;
+                                  if (hasCosmetologist) serviceCount++;
+                                  if (hasGuestPlace) serviceCount++;
+                                  if (hasHost) serviceCount++;
+                                  if (hasPhotographer) serviceCount++;
+                                  if (hasTechnician) serviceCount++;
+                                  if (serviceCount <= 1) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Please select at least two services')));
+                                    return;
+                                  }
+                                  Navigator.of(context).pop();
+                                  NavigatorRoutes.generateByBudget(context,
+                                      eventDate: _selectedDate!,
+                                      budget:
+                                          double.parse(budgetController.text),
+                                      eventType: widget.eventType,
+                                      hasCatering: hasCatering,
+                                      hasCosmetologist: hasCosmetologist,
+                                      hasGuestPlace: hasGuestPlace,
+                                      hasHost: hasHost,
+                                      hasPhotographer: hasPhotographer,
+                                      hasTechnician: hasTechnician);
+                                },
+                                child: all20Pix(
+                                  child: Text('GENERATE EVENT',
+                                      style: buttonSweetCornStyle()),
+                                ))
+                          ],
+                        ),
+                      ]),
+                    ),
                   ),
                 ),
               ),
@@ -271,52 +416,192 @@ class _EventGenerationScreenState extends State<EventGenerationScreen> {
 
   void showInputGuestsDialog() {
     budgetController.clear();
+    bool hasCatering = false;
+    bool hasCosmetologist = false;
+    bool hasGuestPlace = false;
+    bool hasHost = false;
+    bool hasPhotographer = false;
+    bool hasTechnician = false;
     showDialog(
         context: context,
         builder: (context) => GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
-              child: AlertDialog(
-                shape: RoundedRectangleBorder(
-                    side: BorderSide(
-                        color: CustomColors.midnightExtress, width: 2),
-                    borderRadius: BorderRadius.circular(10)),
-                content: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  child: Column(
-                    children: [
-                      comicNeueText(
-                          label: 'INPUT YOUR GUEST COUNT',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20),
-                      vertical10Pix(
-                        child: EventEaseTextField(
-                            text: '',
-                            controller: guestController,
-                            textInputType: TextInputType.numberWithOptions(
-                                decimal: false)),
+              child: StatefulBuilder(
+                builder: (context, setState) => AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color: CustomColors.midnightExtress, width: 2),
+                      borderRadius: BorderRadius.circular(10)),
+                  content: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.8,
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          comicNeueText(
+                              label: 'INPUT YOUR GUEST COUNT',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20),
+                          vertical10Pix(
+                            child: EventEaseTextField(
+                                text: '',
+                                controller: guestController,
+                                textInputType: TextInputType.numberWithOptions(
+                                    decimal: false)),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.75,
+                            child: comicNeueText(
+                              label: 'SELECT OPTIONS',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                          Column(
+                            children: [
+                              SizedBox(
+                                height: 30,
+                                child: CheckboxListTile(
+                                  title: comicNeueText(label: 'Catering'),
+                                  checkColor: CustomColors.sweetCorn,
+                                  activeColor: CustomColors.midnightExtress,
+                                  value: hasCatering,
+                                  onChanged: (bool? value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        hasCatering = value;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: CheckboxListTile(
+                                  title: comicNeueText(label: 'Cosmetologist'),
+                                  checkColor: CustomColors.sweetCorn,
+                                  activeColor: CustomColors.midnightExtress,
+                                  value: hasCosmetologist,
+                                  onChanged: (bool? value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        hasCosmetologist = value;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: CheckboxListTile(
+                                  title: comicNeueText(label: 'Guest\'s Place'),
+                                  checkColor: CustomColors.sweetCorn,
+                                  activeColor: CustomColors.midnightExtress,
+                                  value: hasGuestPlace,
+                                  onChanged: (bool? value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        hasGuestPlace = value;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: CheckboxListTile(
+                                  title: comicNeueText(label: 'Host'),
+                                  checkColor: CustomColors.sweetCorn,
+                                  activeColor: CustomColors.midnightExtress,
+                                  value: hasHost,
+                                  onChanged: (bool? value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        hasHost = value;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: CheckboxListTile(
+                                  title: comicNeueText(label: 'Photographer'),
+                                  checkColor: CustomColors.sweetCorn,
+                                  activeColor: CustomColors.midnightExtress,
+                                  value: hasPhotographer,
+                                  onChanged: (bool? value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        hasPhotographer = value;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                height: 30,
+                                child: CheckboxListTile(
+                                  title: comicNeueText(label: 'Technician'),
+                                  checkColor: CustomColors.sweetCorn,
+                                  activeColor: CustomColors.midnightExtress,
+                                  value: hasTechnician,
+                                  onChanged: (bool? value) {
+                                    if (value != null) {
+                                      setState(() {
+                                        hasTechnician = value;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          Gap(20),
+                          ElevatedButton(
+                              onPressed: () {
+                                if (int.tryParse(guestController.text) ==
+                                        null ||
+                                    int.parse(guestController.text) <= 0) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Please enter a valid guest count higher than 0')));
+                                  return;
+                                }
+                                int serviceCount = 0;
+                                if (hasCatering) serviceCount++;
+                                if (hasCosmetologist) serviceCount++;
+                                if (hasGuestPlace) serviceCount++;
+                                if (hasHost) serviceCount++;
+                                if (hasPhotographer) serviceCount++;
+                                if (hasTechnician) serviceCount++;
+                                if (serviceCount <= 1) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Please select at least two services')));
+                                  return;
+                                }
+                                Navigator.of(context).pop();
+                                NavigatorRoutes.generateByGuestCount(context,
+                                    eventDate: _selectedDate!,
+                                    guestCount: int.parse(guestController.text),
+                                    eventType: widget.eventType,
+                                    hasCatering: hasCatering,
+                                    hasCosmetologist: hasCosmetologist,
+                                    hasGuestPlace: hasGuestPlace,
+                                    hasHost: hasHost,
+                                    hasPhotographer: hasPhotographer,
+                                    hasTechnician: hasTechnician);
+                              },
+                              child: all20Pix(
+                                child: Text('GENERATE EVENT',
+                                    style: buttonSweetCornStyle()),
+                              ))
+                        ],
                       ),
-                      Gap(50),
-                      ElevatedButton(
-                          onPressed: () {
-                            if (int.tryParse(guestController.text) == null ||
-                                int.parse(guestController.text) <= 0) {
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Please enter a valid guest count higher than 0')));
-                              return;
-                            }
-                            Navigator.of(context).pop();
-                            NavigatorRoutes.generateByGuestCount(context,
-                                eventDate: _selectedDate!,
-                                guestCount: int.parse(guestController.text),
-                                eventType: widget.eventType);
-                          },
-                          child: all20Pix(
-                            child: Text('GENERATE EVENT',
-                                style: buttonSweetCornStyle()),
-                          ))
-                    ],
+                    ),
                   ),
                 ),
               ),

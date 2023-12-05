@@ -85,21 +85,50 @@ class NavigatorRoutes {
   static void generateByBudget(BuildContext context,
       {required DateTime eventDate,
       required double budget,
-      required String eventType}) {
+      required String eventType,
+      required hasCatering,
+      required hasCosmetologist,
+      required hasGuestPlace,
+      required hasHost,
+      required hasPhotographer,
+      required hasTechnician}) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => GenerateByBudgetScreen(
-            eventDate: eventDate, budget: budget, eventType: eventType)));
+              eventDate: eventDate,
+              budget: budget,
+              eventType: eventType,
+              hasCatering: hasCatering,
+              hasCosmetologist: hasCosmetologist,
+              hasGuestPlace: hasGuestPlace,
+              hasHost: hasHost,
+              hasPhotographer: hasPhotographer,
+              hasTechnician: hasTechnician,
+            )));
   }
 
-  static void generateByGuestCount(BuildContext context,
-      {required DateTime eventDate,
-      required int guestCount,
-      required String eventType}) {
+  static void generateByGuestCount(
+    BuildContext context, {
+    required DateTime eventDate,
+    required int guestCount,
+    required String eventType,
+    required hasCatering,
+    required hasCosmetologist,
+    required hasGuestPlace,
+    required hasHost,
+    required hasPhotographer,
+    required hasTechnician,
+  }) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => GenerateByGuestCountScreen(
             eventDate: eventDate,
             guestCount: guestCount,
-            eventType: eventType)));
+            eventType: eventType,
+            hasCatering: hasCatering,
+            hasCosmetologist: hasCosmetologist,
+            hasGuestPlace: hasGuestPlace,
+            hasHost: hasHost,
+            hasPhotographer: hasPhotographer,
+            hasTechnician: hasTechnician)));
   }
 
   static void editFAQ(BuildContext context, {required String FAQID}) {

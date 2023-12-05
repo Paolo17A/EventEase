@@ -7,6 +7,7 @@ import 'package:event_ease/widgets/custom_miscellaneous_widgets.dart';
 import 'package:event_ease/widgets/custom_padding_widgets.dart';
 import 'package:event_ease/widgets/custom_styling_widgets.dart';
 import 'package:event_ease/widgets/profile_app_bar_widget.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -113,6 +114,47 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
     }
   }
 
+  void cancelThisSupplier(DocumentSnapshot supplierDoc) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      final supplierData = supplierDoc.data() as Map<dynamic, dynamic>;
+      String offeredService = supplierData['offeredService'];
+      String serviceParameter = getServiceParameter(offeredService);
+
+      final eventData = await getThisEvent(eventID);
+      Map<dynamic, dynamic> currentSupplierMap = eventData[serviceParameter];
+      currentSupplierMap['confirmed'] = false;
+      currentSupplierMap['supplier'] = '';
+      currentSupplierMap['completionPaymentTransaction'] = '';
+      currentSupplierMap['downPaymentTransaction'] = '';
+      currentSupplierMap['status'] = '';
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventID)
+          .update({serviceParameter: currentSupplierMap});
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(supplierDoc.id)
+          .update({
+        'currentEvents': FieldValue.arrayRemove([eventID]),
+        'currentClients':
+            FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+      });
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Successfully cancelled this supplier')));
+      getCurrentEvent();
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Error cancelling this supplier: $error')));
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   bool eligibleForPayAllAtOnce() {
     bool pendingCatering = cateringStatus == 'PENDING DOWN PAYMENT' ||
         cateringStatus == 'PENDING COMPLETION PAYMENT';
@@ -147,7 +189,8 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
               _eventDetailsContainer(),
               Divider(thickness: 2, color: CustomColors.midnightExtress),
               _currentSuppliersContainer(),
-              _editEventButton(),
+              if (eventDate.difference(DateTime.now()).inDays > 30)
+                _editEventButton(),
               if (eligibleForPayAllAtOnce()) _settleAllPaymentsButton()
             ],
           )),
@@ -422,6 +465,37 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
                         child: ElevatedButton(
                             onPressed: () {
                               Navigator.of(context).pop();
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                        content: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.8,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.3,
+                                            child: comicNeueText(
+                                                label:
+                                                    'Are you sure you want to cancel this supplier? All payments made will not be refunded.',
+                                                fontSize: 18)),
+                                        actions: [
+                                          ElevatedButton(
+                                              onPressed: () =>
+                                                  Navigator.of(context).pop(),
+                                              child: comicNeueText(
+                                                  label: 'Go Back')),
+                                          ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop();
+                                                cancelThisSupplier(supplierDoc);
+                                              },
+                                              child: comicNeueText(
+                                                  label: 'Cancel Supplier'))
+                                        ],
+                                      ));
                             },
                             child: Text('CANCEL SERVICE',
                                 style: buttonSweetCornStyle())),

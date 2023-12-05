@@ -75,8 +75,12 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
           .collection('users')
           .doc(widget.supplierUID)
           .update({
-        'serviceRequests':
-            FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+        'serviceRequests': FieldValue.arrayUnion([
+          {
+            'dateSent': DateTime.now(),
+            'requestingClient': FirebaseAuth.instance.currentUser!.uid
+          }
+        ])
       });
 
       //  Edit the event document

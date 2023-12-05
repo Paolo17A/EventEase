@@ -17,11 +17,24 @@ class GenerateByBudgetScreen extends StatefulWidget {
   final DateTime eventDate;
   final double budget;
   final String eventType;
-  const GenerateByBudgetScreen(
-      {super.key,
-      required this.eventDate,
-      required this.budget,
-      required this.eventType});
+  final bool hasCatering;
+  final bool hasCosmetologist;
+  final bool hasGuestPlace;
+  final bool hasHost;
+  final bool hasPhotographer;
+  final bool hasTechnician;
+  const GenerateByBudgetScreen({
+    super.key,
+    required this.eventDate,
+    required this.budget,
+    required this.eventType,
+    required this.hasCatering,
+    required this.hasCosmetologist,
+    required this.hasGuestPlace,
+    required this.hasHost,
+    required this.hasPhotographer,
+    required this.hasTechnician,
+  });
 
   @override
   State<GenerateByBudgetScreen> createState() => _GenerateByBudgetScreenState();
@@ -65,14 +78,19 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
         return;
       }
 
-      availableCaterers = await getAvailableSuppliers('CATERING');
-      availableCosmetologists = await getAvailableSuppliers('COSMETOLOGIST');
-      availableGuestPlaces = await getAvailableSuppliers('GUEST\'S PLACE');
-      availableHosts = await getAvailableSuppliers('HOST');
-      availableTechnicians =
-          await getAvailableSuppliers('LIGHT AND SOUND TECHNICIAN');
-      availablePhotographers =
-          await getAvailableSuppliers('PHOTOGRAPHER AND VIDEOGRAPHER');
+      if (widget.hasCatering)
+        availableCaterers = await getAvailableSuppliers('CATERING');
+      if (widget.hasCosmetologist)
+        availableCosmetologists = await getAvailableSuppliers('COSMETOLOGIST');
+      if (widget.hasGuestPlace)
+        availableGuestPlaces = await getAvailableSuppliers('GUEST\'S PLACE');
+      if (widget.hasHost) availableHosts = await getAvailableSuppliers('HOST');
+      if (widget.hasTechnician)
+        availableTechnicians =
+            await getAvailableSuppliers('LIGHT AND SOUND TECHNICIAN');
+      if (widget.hasPhotographer)
+        availablePhotographers =
+            await getAvailableSuppliers('PHOTOGRAPHER AND VIDEOGRAPHER');
 
       //  Calculated the allocated budget for each supplier based on which service type is available.
       int splitFactor = 6;
@@ -289,8 +307,12 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
             .collection('users')
             .doc(randomCaterer!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -299,8 +321,12 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
             .collection('users')
             .doc(randomCosmetologist!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -309,8 +335,12 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
             .collection('users')
             .doc(randomGuestPlace!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -319,8 +349,12 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
             .collection('users')
             .doc(randomHost!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -329,8 +363,12 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
             .collection('users')
             .doc(randomPhotographer!.id)
             .update({
-          'serviceRequests':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
 
@@ -339,8 +377,12 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
             .collection('users')
             .doc(randomPhotographer!.id)
             .update({
-          'randomTechnician':
-              FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+          'serviceRequests': FieldValue.arrayUnion([
+            {
+              'dateSent': DateTime.now(),
+              'requestingClient': FirebaseAuth.instance.currentUser!.uid
+            }
+          ])
         });
       }
       //  Go back to event generation screen
@@ -368,6 +410,25 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
     }
   }
 
+  bool _mayGenerateEvent() {
+    bool mayCater = widget.hasCatering && availableCaterers.isNotEmpty;
+    bool mayCosmetics =
+        widget.hasCosmetologist && availableCosmetologists.isNotEmpty;
+    bool mayGuestPlace =
+        widget.hasGuestPlace && availableCosmetologists.isNotEmpty;
+    bool mayHost = widget.hasHost && availableHosts.isNotEmpty;
+    bool mayPhotographer =
+        widget.hasPhotographer && availablePhotographers.isNotEmpty;
+    bool mayTechnician =
+        widget.hasTechnician && availableTechnicians.isNotEmpty;
+    return mayCater ||
+        mayCosmetics ||
+        mayGuestPlace ||
+        mayHost ||
+        mayPhotographer ||
+        mayTechnician;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -392,29 +453,36 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
             ? SingleChildScrollView(
                 child: Column(
                   children: [
-                    randomSupplierWidget(context,
-                        randomSupplier: randomCaterer,
-                        offeredService: 'CATERING'),
-                    randomSupplierWidget(context,
-                        randomSupplier: randomCosmetologist,
-                        offeredService: 'COSMETOLOGIST'),
-                    randomSupplierWidget(context,
-                        randomSupplier: randomGuestPlace,
-                        offeredService: 'GUEST\'S PLACE'),
-                    randomSupplierWidget(context,
-                        randomSupplier: randomTechnician,
-                        offeredService: 'HOST'),
-                    randomSupplierWidget(context,
-                        randomSupplier: randomPhotographer,
-                        offeredService: 'PHOTOGRAPHER AND VIDEOGRAPHER'),
-                    randomSupplierWidget(context,
-                        randomSupplier: randomHost,
-                        offeredService: 'LIGHT AND SOUND TECHNICIAN'),
+                    if (widget.hasCatering)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomCaterer,
+                          offeredService: 'CATERING'),
+                    if (widget.hasCosmetologist)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomCosmetologist,
+                          offeredService: 'COSMETOLOGIST'),
+                    if (widget.hasGuestPlace)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomGuestPlace,
+                          offeredService: 'GUEST\'S PLACE'),
+                    if (widget.hasHost)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomTechnician,
+                          offeredService: 'HOST'),
+                    if (widget.hasPhotographer)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomPhotographer,
+                          offeredService: 'PHOTOGRAPHER AND VIDEOGRAPHER'),
+                    if (widget.hasTechnician)
+                      randomSupplierWidget(context,
+                          randomSupplier: randomHost,
+                          offeredService: 'LIGHT AND SOUND TECHNICIAN'),
                     Gap(30),
-                    ElevatedButton(
-                        onPressed: generateEventByBudget,
-                        child: Text('Generate This Event',
-                            style: buttonSweetCornStyle()))
+                    if (_mayGenerateEvent())
+                      ElevatedButton(
+                          onPressed: generateEventByBudget,
+                          child: Text('Generate This Event',
+                              style: buttonSweetCornStyle()))
                   ],
                 ),
               )

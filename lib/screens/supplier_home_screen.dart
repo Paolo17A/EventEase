@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_ease/utils/custom_string_util.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
@@ -24,7 +27,6 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
 
   @override
   void didChangeDependencies() {
-    print('chaning');
     super.didChangeDependencies();
     getClientData();
   }
@@ -35,6 +37,38 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
       final userData = await getCurrentUserData();
       profileImageURL = userData['profileImageURL'];
       formattedName = '${userData['firstName']} ${userData['lastName']}';
+      List<dynamic> serviceRequests = userData['serviceRequests'];
+
+      //  Handle unresponded customer requests.
+      List<dynamic> serviceRequestsCopy = List.from(serviceRequests);
+      for (int i = 0; i < serviceRequestsCopy.length; i++) {
+        DateTime dateSent =
+            (serviceRequestsCopy[i]['dateSent'] as Timestamp).toDate();
+        if (DateTime.now().difference(dateSent).inDays >= 3) {
+          String requestingClient = serviceRequestsCopy[i]['requestingClient'];
+          final clientData = await getThisUserData(requestingClient);
+          String currentEventID = clientData['currentEventID'];
+          final eventData = await getThisEvent(currentEventID);
+          String serviceOffered = userData['offeredService'];
+          final serviceParameter = getServiceParameter(serviceOffered);
+          Map<dynamic, dynamic> currentSupplierMap =
+              eventData[serviceParameter];
+          currentSupplierMap['status'] = '';
+          currentSupplierMap['supplier'] = '';
+          await FirebaseFirestore.instance
+              .collection('events')
+              .doc(currentEventID)
+              .update({serviceParameter: currentSupplierMap});
+          serviceRequests.remove(serviceRequestsCopy[i]);
+        }
+      }
+      if (serviceRequestsCopy.length != serviceRequests.length) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({'serviceRequests': serviceRequests});
+      }
+
       setState(() {
         _isLoading = false;
       });

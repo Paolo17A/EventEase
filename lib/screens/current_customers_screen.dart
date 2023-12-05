@@ -36,7 +36,7 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
     try {
       final userData = await getCurrentUserData();
       List<dynamic> serviceRequests = userData['serviceRequests'];
-
+      print(serviceRequests);
       if (serviceRequests.isEmpty) {
         setState(() {
           pendingCustomers.clear();
@@ -44,10 +44,15 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
         });
         return;
       }
+
       //  Get all pending customers (if meron)
+      List<dynamic> serviceRequesters = [];
+      for (var requester in serviceRequests) {
+        serviceRequesters.add(requester['requestingClient']);
+      }
       final customers = await FirebaseFirestore.instance
           .collection('users')
-          .where(FieldPath.documentId, whereIn: serviceRequests)
+          .where(FieldPath.documentId, whereIn: serviceRequesters)
           .get();
       pendingCustomers = customers.docs;
 
@@ -129,12 +134,13 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
             .update({supplierServiceParameter: serviceMap});
       }
       //  Remove the requesting customer from the supplier's service request list
+      List<dynamic> serviceRequests = currentSupplierData['serviceRequests'];
+      serviceRequests.removeWhere(
+          (request) => request['requestingClient'] == requestingCustomer.id);
       await FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
-          .update({
-        'serviceRequests': FieldValue.arrayRemove([requestingCustomer.id])
-      });
+          .update({'serviceRequests': serviceRequests});
 
       //  Refresh the screen's current customer requests.
       getAllServiceRequests();
