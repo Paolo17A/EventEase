@@ -37,7 +37,6 @@ class _SupplierCalendarScreenState extends State<SupplierCalendarScreen> {
     try {
       final userData = await getCurrentUserData();
       offeredServiceParam = getServiceParameter(userData['offeredService']);
-      print(offeredServiceParam);
       List<dynamic> currentEvents = userData['currentEvents'];
       final events = await FirebaseFirestore.instance
           .collection('events')
@@ -50,6 +49,11 @@ class _SupplierCalendarScreenState extends State<SupplierCalendarScreen> {
         });
         return;
       }
+      eventDocs = eventDocs.where((event) {
+        final eventData = event.data() as Map<dynamic, dynamic>;
+        bool isCancelled = eventData['isCancelled'];
+        return !isCancelled;
+      }).toList();
 
       List<String> associatedClients = [];
       for (var event in eventDocs) {

@@ -3,6 +3,7 @@ import 'package:event_ease/screens/add_faq_screen.dart';
 import 'package:event_ease/screens/add_service_screen.dart';
 import 'package:event_ease/screens/admin_home_screen.dart';
 import 'package:event_ease/screens/avail_premium_screen.dart';
+import 'package:event_ease/screens/chat_threads_screen.dart';
 import 'package:event_ease/screens/client_calendar_screen.dart';
 import 'package:event_ease/screens/client_home_screen.dart';
 import 'package:event_ease/screens/client_login_screen.dart';
@@ -57,6 +58,7 @@ final Map<String, WidgetBuilder> _routes = {
   NavigatorRoutes.transactionHistory: (context) =>
       const TransactionHistoryScreen(),
   NavigatorRoutes.viewFAQs: (context) => const ViewFAQsScreen(),
+  NavigatorRoutes.chatThreads: (context) => const ChatThreadsScreen(),
 
   //CLIENT
   NavigatorRoutes.clientLogin: (context) => const ClientLoginScreen(),

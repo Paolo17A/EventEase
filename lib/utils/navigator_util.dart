@@ -1,3 +1,4 @@
+import 'package:event_ease/screens/chat_screen.dart';
 import 'package:event_ease/screens/edit_faq_screen.dart';
 import 'package:event_ease/screens/event_generation_screen.dart';
 import 'package:event_ease/screens/generate_by_budget_screen.dart';
@@ -14,6 +15,7 @@ class NavigatorRoutes {
   static const String feedbackHistory = '/feedbackHistory';
   static const String eventHistory = '/eventHistory';
   static const String viewFAQs = '/viewFAQs';
+  static const String chatThreads = '/chatThreads';
 
   //  CLIENT
   static const String clientLogin = '/clientLogin';
@@ -134,5 +136,10 @@ class NavigatorRoutes {
   static void editFAQ(BuildContext context, {required String FAQID}) {
     Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => EditFAQScreen(FAQID: FAQID)));
+  }
+
+  static void chat(BuildContext context, {required String otherPersonUID}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ChatScreen(otherPersonUID: otherPersonUID)));
   }
 }

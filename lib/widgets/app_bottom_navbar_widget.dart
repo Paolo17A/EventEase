@@ -27,6 +27,7 @@ void _processPress(BuildContext context, selectedIndex, int currentIndex,
       }
       break;
     case 1:
+      Navigator.of(context).pushNamed(NavigatorRoutes.chatThreads);
       break;
     case 2:
       Navigator.pushNamed(
