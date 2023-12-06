@@ -110,6 +110,11 @@ class _ChatThreadsScreenState extends State<ChatThreadsScreen> {
             .where(FieldPath.documentId, whereIn: currentClients)
             .get();
         clientDocs = clients.docs;
+        /*clientDocs = clientDocs.where((client) {
+          final clientData = client.data() as Map<dynamic, dynamic>;
+          String currentEventID = clientData['currentEventID'];
+          return currentEventID.isNotEmpty;
+        }).toList();*/
 
         if (clientDocs.isNotEmpty) {
           List<dynamic> associatedEvents = [];

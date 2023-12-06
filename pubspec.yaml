@@ -45,6 +45,8 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   intl: ^0.18.1
   flutter_calendar_carousel: ^2.4.2
+  dropdown_search: ^5.0.6
+  flutter_rating_bar: ^4.0.1
 
 dev_dependencies:
   flutter_test:

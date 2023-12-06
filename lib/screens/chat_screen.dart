@@ -59,9 +59,10 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
+          backgroundColor: Colors.white,
           title: comicNeueText(
               label: '$_otherUserFirstName $_otherUserLastName',
-              color: CustomColors.sweetCorn),
+              color: CustomColors.midnightExtress),
         ),
         body: stackedLoadingContainer(
             context,

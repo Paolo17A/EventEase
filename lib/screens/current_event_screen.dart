@@ -38,6 +38,7 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
   String photographerStatus = '';
   DocumentSnapshot? technician;
   String technicianStatus = '';
+  bool isFinished = false;
 
   @override
   void didChangeDependencies() {
@@ -53,7 +54,7 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
       final eventData = await getThisEvent(eventID);
       eventType = eventData['eventType'];
       eventDate = (eventData['eventDate'] as Timestamp).toDate();
-
+      isFinished = eventData['isFinished'];
       catering = eventData['catering']['confirmed'] == true
           ? await FirebaseFirestore.instance
               .collection('users')
@@ -160,21 +161,271 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
         cateringStatus == 'PENDING COMPLETION PAYMENT';
     bool pendingCosmetologist = cosmetologistStatus == 'PENDING DOWN PAYMENT' ||
         cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
-    bool pendingGuestPlace = guestPlace == 'PENDING DOWN PAYMENT' ||
-        cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
+    bool pendingGuestPlace = guestPlaceStatus == 'PENDING DOWN PAYMENT' ||
+        guestPlaceStatus == 'PENDING COMPLETION PAYMENT';
     bool pendingHost = hostStatus == 'PENDING DOWN PAYMENT' ||
-        cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
+        hostStatus == 'PENDING COMPLETION PAYMENT';
     bool pendingPhotographer = photographerStatus == 'PENDING DOWN PAYMENT' ||
-        cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
+        photographerStatus == 'PENDING COMPLETION PAYMENT';
     bool pendingTechnician = technicianStatus == 'PENDING DOWN PAYMENT' ||
-        cosmetologistStatus == 'PENDING COMPLETION PAYMENT';
-
+        technicianStatus == 'PENDING COMPLETION PAYMENT';
     return pendingCatering ||
         pendingCosmetologist ||
         pendingGuestPlace ||
         pendingHost ||
         pendingPhotographer ||
         pendingTechnician;
+  }
+
+  bool eligibleForEventCompletion() {
+    bool eligibleCatering =
+        catering == null || (cateringStatus == 'TO RATE' && catering != null);
+    bool eligibleCosmetologist = cosmetologist == null ||
+        (cosmetologistStatus == 'TO RATE' && cosmetologist != null);
+    bool eligibleGuestPlace = guestPlace == null ||
+        (guestPlaceStatus == 'TO RATE' && guestPlace != null);
+    bool eligibleHost =
+        host == null || (hostStatus == 'TO RATE' && host != null);
+    bool eligiblePhotographer = photographer == null ||
+        (photographerStatus == 'TO RATE' && photographer != null);
+    bool eligibleTechnician = technician == null ||
+        (technicianStatus == 'TO RATE' && technician != null);
+    return (eligibleCatering ||
+        eligibleCosmetologist ||
+        eligibleGuestPlace ||
+        eligibleHost ||
+        eligiblePhotographer ||
+        eligibleTechnician);
+  }
+
+  void markEventAsComplete() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(eventID)
+          .update({'isFinished': true});
+
+      if (catering != null) {
+        String feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'rater': FirebaseAuth.instance.currentUser!.uid,
+          'receiver': catering!.id
+        });
+
+        feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'receiver': FirebaseAuth.instance.currentUser!.uid,
+          'rater': catering!.id
+        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(catering!.id)
+            .update({
+          'currentClients':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+
+      if (cosmetologist != null) {
+        String feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'rater': FirebaseAuth.instance.currentUser!.uid,
+          'receiver': cosmetologist!.id
+        });
+
+        feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'receiver': FirebaseAuth.instance.currentUser!.uid,
+          'rater': cosmetologist!.id
+        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(cosmetologist!.id)
+            .update({
+          'currentClients':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+
+      if (guestPlace != null) {
+        String feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'rater': FirebaseAuth.instance.currentUser!.uid,
+          'receiver': guestPlace!.id
+        });
+
+        feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'receiver': FirebaseAuth.instance.currentUser!.uid,
+          'rater': guestPlace!.id
+        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(guestPlace!.id)
+            .update({
+          'currentClients':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+
+      if (host != null) {
+        String feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'rater': FirebaseAuth.instance.currentUser!.uid,
+          'receiver': host!.id
+        });
+
+        feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'receiver': FirebaseAuth.instance.currentUser!.uid,
+          'rater': host!.id
+        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(host!.id)
+            .update({
+          'currentClients':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+
+      if (photographer != null) {
+        String feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'rater': FirebaseAuth.instance.currentUser!.uid,
+          'receiver': photographer!.id
+        });
+
+        feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'receiver': FirebaseAuth.instance.currentUser!.uid,
+          'rater': photographer!.id
+        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(photographer!.id)
+            .update({
+          'currentClients':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+
+      if (technician != null) {
+        String feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'rater': FirebaseAuth.instance.currentUser!.uid,
+          'receiver': technician!.id
+        });
+
+        feedbackID = DateTime.now().millisecondsSinceEpoch.toString();
+        await FirebaseFirestore.instance
+            .collection('feedbacks')
+            .doc(feedbackID)
+            .set({
+          'rated': false,
+          'rating': 0,
+          'feedback': '',
+          'receiver': FirebaseAuth.instance.currentUser!.uid,
+          'rater': technician!.id
+        });
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(technician!.id)
+            .update({
+          'currentClients':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({'currentEventID': ''});
+      setState(() {
+        _isLoading = false;
+      });
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Successfully marked event as complete.')));
+      navigator.pop();
+      navigator.pushReplacementNamed(NavigatorRoutes.clientHome);
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Error marking event as complete: $error')));
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -191,7 +442,10 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
               _currentSuppliersContainer(),
               if (eventDate.difference(DateTime.now()).inDays > 30)
                 _editEventButton(),
-              if (eligibleForPayAllAtOnce()) _settleAllPaymentsButton()
+              if (eligibleForPayAllAtOnce()) _settleAllPaymentsButton(),
+              if ((!DateTime.now().isBefore(eventDate)) &&
+                  eligibleForEventCompletion())
+                postEventWidgets()
             ],
           )),
     );
@@ -400,6 +654,10 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
                                       'PROCESSING COMPLETION PAYMENT')
                                 comicNeueText(
                                     label: 'PHP ${formatPrice(fixedRate / 2)}',
+                                    fontSize: 20)
+                              else
+                                comicNeueText(
+                                    label: 'PHP ${formatPrice(fixedRate)}',
                                     fontSize: 20),
                               Gap(20)
                             ],
@@ -460,50 +718,71 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
                             color: CustomColors.midnightExtress,
                             fontSize: 20),
                       Gap(30),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                        content: SizedBox(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width *
-                                                0.8,
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.3,
-                                            child: comicNeueText(
-                                                label:
-                                                    'Are you sure you want to cancel this supplier? All payments made will not be refunded.',
-                                                fontSize: 18)),
-                                        actions: [
-                                          ElevatedButton(
-                                              onPressed: () =>
-                                                  Navigator.of(context).pop(),
-                                              child: comicNeueText(
-                                                  label: 'Go Back')),
-                                          ElevatedButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                                cancelThisSupplier(supplierDoc);
-                                              },
-                                              child: comicNeueText(
-                                                  label: 'Cancel Supplier'))
-                                        ],
-                                      ));
-                            },
-                            child: Text('CANCEL SERVICE',
-                                style: buttonSweetCornStyle())),
-                      )
+                      if (paymentStatus == 'PENDING COMPLETION PAYMENT' ||
+                          paymentStatus == 'PENDING DOWN PAYMENT' ||
+                          paymentStatus == 'PROCESSING DOWN PAYMENT')
+                        cancelSelectedClient(supplierDoc)
+                      else if (paymentStatus == 'TO RATE')
+                        comicNeueText(
+                            label:
+                                'Please wait until after the event is completed to rate this supplier',
+                            textAlign: TextAlign.center,
+                            color: CustomColors.midnightExtress,
+                            fontSize: 20)
                     ],
                   ),
                 ),
               ),
             ));
+  }
+
+  Widget cancelSelectedClient(DocumentSnapshot supplierDoc) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            showConfirmSupplierCancelDialoog(supplierDoc);
+          },
+          child: Text('CANCEL SERVICE', style: buttonSweetCornStyle())),
+    );
+  }
+
+  void showConfirmSupplierCancelDialoog(DocumentSnapshot supplierDoc) {
+    showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              content: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  child: comicNeueText(
+                      label:
+                          'Are you sure you want to cancel this supplier? All payments made will not be refunded.',
+                      fontSize: 18)),
+              actions: [
+                ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: comicNeueText(label: 'Go Back')),
+                ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      cancelThisSupplier(supplierDoc);
+                    },
+                    child: comicNeueText(label: 'Cancel Supplier'))
+              ],
+            ));
+  }
+
+  Widget postEventWidgets() {
+    return all20Pix(
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: markEventAsComplete,
+          child: Text('MARK EVENT AS COMPLETED',
+              textAlign: TextAlign.center, style: buttonSweetCornStyle()),
+        ),
+      ),
+    );
   }
 }

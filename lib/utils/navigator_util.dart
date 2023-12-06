@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_ease/screens/approve_cashout_screen.dart';
 import 'package:event_ease/screens/chat_screen.dart';
 import 'package:event_ease/screens/edit_faq_screen.dart';
 import 'package:event_ease/screens/event_generation_screen.dart';
 import 'package:event_ease/screens/generate_by_budget_screen.dart';
 import 'package:event_ease/screens/generate_by_guest_count_screen.dart';
+import 'package:event_ease/screens/rate_selected_user_screen.dart';
 import 'package:event_ease/screens/selected_supplier_screen.dart';
 import 'package:event_ease/screens/settle_payment_screen.dart';
 import 'package:event_ease/screens/view_available_suppliers_screen.dart';
@@ -16,6 +19,7 @@ class NavigatorRoutes {
   static const String eventHistory = '/eventHistory';
   static const String viewFAQs = '/viewFAQs';
   static const String chatThreads = '/chatThreads';
+  static const String pendingRatings = '/pendingRatings';
 
   //  CLIENT
   static const String clientLogin = '/clientLogin';
@@ -41,6 +45,8 @@ class NavigatorRoutes {
   static const String currentCustomers = '/currentCustomers';
   static const String supplierCalendar = '/supplierCalendar';
   static const String incomeHistory = '/incomeHistory';
+  static const String cashOutHistory = '/cashoutHistory';
+  static const String newCashOutRequest = '/newCashoutRequest';
 
   //  ADMIN
   static const String adminHome = '/adminHome';
@@ -48,6 +54,7 @@ class NavigatorRoutes {
   static const String premiumRequests = '/premiumRequests';
   static const String handlePayments = '/handlePayments';
   static const String addFAQ = '/addFAQ';
+  static const String handleCashouts = '/handleCashouts';
 
   static void eventGeneration(BuildContext context,
       {required String eventType}) {
@@ -141,5 +148,21 @@ class NavigatorRoutes {
   static void chat(BuildContext context, {required String otherPersonUID}) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => ChatScreen(otherPersonUID: otherPersonUID)));
+  }
+
+  static void approveCashout(BuildContext context,
+      {required DocumentSnapshot cashoutDoc,
+      required DocumentSnapshot supplierDoc}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ApproveCashoutScreen(
+            cashoutDoc: cashoutDoc, supplierDoc: supplierDoc)));
+  }
+
+  static void rateSelectedUser(BuildContext context, bool isClient,
+      {required DocumentSnapshot feedbackDoc,
+      required DocumentSnapshot userDoc}) {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => RateSelectedUserScreen(
+            isClient: isClient, feedbackDoc: feedbackDoc, userDoc: userDoc)));
   }
 }

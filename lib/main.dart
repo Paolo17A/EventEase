@@ -3,6 +3,7 @@ import 'package:event_ease/screens/add_faq_screen.dart';
 import 'package:event_ease/screens/add_service_screen.dart';
 import 'package:event_ease/screens/admin_home_screen.dart';
 import 'package:event_ease/screens/avail_premium_screen.dart';
+import 'package:event_ease/screens/cash_out%20_history_screen.dart';
 import 'package:event_ease/screens/chat_threads_screen.dart';
 import 'package:event_ease/screens/client_calendar_screen.dart';
 import 'package:event_ease/screens/client_home_screen.dart';
@@ -17,9 +18,12 @@ import 'package:event_ease/screens/edit_supplier_profile_screen.dart';
 import 'package:event_ease/screens/event_history_screen.dart';
 import 'package:event_ease/screens/feedback_history_screen.dart';
 import 'package:event_ease/screens/forgot_password_screen.dart';
+import 'package:event_ease/screens/handle_cashouts_screen.dart';
 import 'package:event_ease/screens/handle_payment_screen.dart';
 import 'package:event_ease/screens/income_history_screen.dart';
 import 'package:event_ease/screens/membership_requests_screen.dart';
+import 'package:event_ease/screens/new_cashout_request_screen.dart';
+import 'package:event_ease/screens/pending_ratings_screen.dart';
 import 'package:event_ease/screens/premium_requests_screen.dart';
 import 'package:event_ease/screens/services_offered_screen.dart';
 import 'package:event_ease/screens/settle_membership_fee_screen.dart';
@@ -59,6 +63,7 @@ final Map<String, WidgetBuilder> _routes = {
       const TransactionHistoryScreen(),
   NavigatorRoutes.viewFAQs: (context) => const ViewFAQsScreen(),
   NavigatorRoutes.chatThreads: (context) => const ChatThreadsScreen(),
+  NavigatorRoutes.pendingRatings: (context) => const PendingRatingsScreen(),
 
   //CLIENT
   NavigatorRoutes.clientLogin: (context) => const ClientLoginScreen(),
@@ -85,6 +90,9 @@ final Map<String, WidgetBuilder> _routes = {
   NavigatorRoutes.currentCustomers: (context) => const CurrentCustomersScreen(),
   NavigatorRoutes.supplierCalendar: (context) => const SupplierCalendarScreen(),
   NavigatorRoutes.incomeHistory: (context) => const IncomeHistoryScreen(),
+  NavigatorRoutes.cashOutHistory: (context) => const CashOutHistoryScreen(),
+  NavigatorRoutes.newCashOutRequest: (context) =>
+      const NewCashoutRequestScreen(),
 
   //ADMIN
   NavigatorRoutes.adminHome: (context) => const AdminHomeScreen(),
@@ -92,7 +100,8 @@ final Map<String, WidgetBuilder> _routes = {
       const MembershipRequestsScreen(),
   NavigatorRoutes.premiumRequests: (context) => const PremiumRequestsScreen(),
   NavigatorRoutes.handlePayments: (context) => const HandlePaymentScreen(),
-  NavigatorRoutes.addFAQ: (context) => const AddFAQScreen()
+  NavigatorRoutes.addFAQ: (context) => const AddFAQScreen(),
+  NavigatorRoutes.handleCashouts: (context) => const HandleCashoutsScreen()
 };
 
 final ThemeData _themeData = ThemeData(
@@ -107,7 +116,7 @@ final ThemeData _themeData = ThemeData(
         showUnselectedLabels: false),
     appBarTheme: const AppBarTheme(
         backgroundColor: CustomColors.midnightExtress,
-        iconTheme: IconThemeData(color: CustomColors.sweetCorn)),
+        iconTheme: IconThemeData(color: CustomColors.midnightExtress)),
     listTileTheme: const ListTileThemeData(
         iconColor: Colors.white,
         shape: RoundedRectangleBorder(

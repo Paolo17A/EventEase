@@ -68,18 +68,28 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           return;
         }
 
-        bool mustPayCatering = await mustSettlePayment(
-            'completionPaymentTransaction', eventData['catering']);
-        bool mustPayCosmetics = await mustSettlePayment(
-            'completionPaymentTransaction', eventData['cosmetologist']);
-        bool mustPayGuestPlace = await mustSettlePayment(
-            'completionPaymentTransaction', eventData['guestPlace']);
-        bool mustPayHost = await mustSettlePayment(
-            'completionPaymentTransaction', eventData['host']);
-        bool mustPayPhotographer = await mustSettlePayment(
-            'completionPaymentTransaction', eventData['photographer']);
-        bool mustPayTechnician = await mustSettlePayment(
-            'completionPaymentTransaction', eventData['technician']);
+        bool mustPayCatering = eventData['catering']['status'] != 'TO RATE' &&
+            await mustSettlePayment(
+                'completionPaymentTransaction', eventData['catering']);
+        bool mustPayCosmetics =
+            eventData['cosmetologist']['status'] != 'TO RATE' &&
+                await mustSettlePayment(
+                    'completionPaymentTransaction', eventData['cosmetologist']);
+        bool mustPayGuestPlace =
+            eventData['guestPlace']['status'] != 'TO RATE' &&
+                await mustSettlePayment(
+                    'completionPaymentTransaction', eventData['guestPlace']);
+        bool mustPayHost = eventData['host']['status'] != 'TO RATE' &&
+            await mustSettlePayment(
+                'completionPaymentTransaction', eventData['host']);
+        bool mustPayPhotographer =
+            eventData['photographer']['status'] != 'TO RATE' &&
+                await mustSettlePayment(
+                    'completionPaymentTransaction', eventData['photographer']);
+        bool mustPayTechnician =
+            eventData['technician']['status'] != 'TO RATE' &&
+                await mustSettlePayment(
+                    'completionPaymentTransaction', eventData['technician']);
 
         if (mustPayCatering ||
             mustPayGuestPlace ||

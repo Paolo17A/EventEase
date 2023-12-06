@@ -79,7 +79,6 @@ class _HandlePaymentScreenState extends State<HandlePaymentScreen> {
           }
         }
       }
-      print('associated users: $associatedUIDs');
 
       //  Get all associated user docs.
       final users = await FirebaseFirestore.instance

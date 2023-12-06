@@ -3,7 +3,6 @@ import 'package:event_ease/utils/colors_util.dart';
 import 'package:event_ease/utils/custom_containers_widget.dart';
 import 'package:event_ease/widgets/custom_miscellaneous_widgets.dart';
 import 'package:event_ease/widgets/custom_padding_widgets.dart';
-import 'package:event_ease/widgets/profile_app_bar_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -75,7 +74,19 @@ class _IncomeHistoryScreenState extends State<IncomeHistoryScreen> {
         return false;
       },
       child: Scaffold(
-        appBar: emptyWhiteAppBar(context),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          foregroundColor: CustomColors.midnightExtress,
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context)
+                    .pushNamed(NavigatorRoutes.cashOutHistory),
+                child: comicNeueText(
+                    label: 'Withdrawals',
+                    fontSize: 15,
+                    textAlign: TextAlign.center))
+          ],
+        ),
         body: switchedLoadingContainer(
             _isLoading,
             Column(

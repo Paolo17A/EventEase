@@ -78,19 +78,26 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
         return;
       }
 
-      if (widget.hasCatering)
+      if (widget.hasCatering) {
         availableCaterers = await getAvailableSuppliers('CATERING');
-      if (widget.hasCosmetologist)
+      }
+      if (widget.hasCosmetologist) {
         availableCosmetologists = await getAvailableSuppliers('COSMETOLOGIST');
-      if (widget.hasGuestPlace)
+      }
+      if (widget.hasGuestPlace) {
         availableGuestPlaces = await getAvailableSuppliers('GUEST\'S PLACE');
-      if (widget.hasHost) availableHosts = await getAvailableSuppliers('HOST');
-      if (widget.hasTechnician)
+      }
+      if (widget.hasHost) {
+        availableHosts = await getAvailableSuppliers('HOST');
+      }
+      if (widget.hasTechnician) {
         availableTechnicians =
             await getAvailableSuppliers('LIGHT AND SOUND TECHNICIAN');
-      if (widget.hasPhotographer)
+      }
+      if (widget.hasPhotographer) {
         availablePhotographers =
             await getAvailableSuppliers('PHOTOGRAPHER AND VIDEOGRAPHER');
+      }
 
       //  Calculated the allocated budget for each supplier based on which service type is available.
       int splitFactor = 6;
@@ -229,6 +236,8 @@ class _GenerateByBudgetScreenState extends State<GenerateByBudgetScreen> {
           availableSuppliers.add(supplier);
         }
       }
+      print('available $requiredService: ${availableSuppliers.length}');
+
       return availableSuppliers;
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_ease/utils/navigator_util.dart';
 import 'package:event_ease/widgets/custom_padding_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:gap/gap.dart';
 
 import '../utils/colors_util.dart';
@@ -432,4 +433,40 @@ Widget FAQEntry(BuildContext context,
       )),
     ],
   ));
+}
+
+Widget starRating({required Function(double) onPress, double starSize = 20}) {
+  return RatingBar(
+      minRating: 1,
+      maxRating: 5,
+      itemCount: 5,
+      initialRating: 5,
+      updateOnDrag: true,
+      allowHalfRating: false,
+      ignoreGestures: false,
+      itemSize: starSize,
+      ratingWidget: RatingWidget(
+          full: const Icon(Icons.star, color: Color.fromARGB(255, 223, 200, 0)),
+          half: const Icon(Icons.star, color: Color.fromARGB(255, 170, 153, 4)),
+          empty: const Icon(Icons.star, color: Colors.grey)),
+      onRatingUpdate: (val) {
+        onPress(val);
+      });
+}
+
+Widget staticStarRating({required double rating, double starSize = 20}) {
+  return RatingBar(
+      minRating: 1,
+      maxRating: 5,
+      itemCount: 5,
+      initialRating: rating,
+      updateOnDrag: false,
+      allowHalfRating: false,
+      ignoreGestures: false,
+      itemSize: starSize,
+      ratingWidget: RatingWidget(
+          full: const Icon(Icons.star, color: Color.fromARGB(255, 223, 200, 0)),
+          half: const Icon(Icons.star, color: Color.fromARGB(255, 170, 153, 4)),
+          empty: const Icon(Icons.star, color: Colors.grey)),
+      onRatingUpdate: (val) {});
 }

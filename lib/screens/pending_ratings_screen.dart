@@ -1,67 +1,58 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:event_ease/utils/colors_util.dart';
 import 'package:event_ease/utils/custom_containers_widget.dart';
-import 'package:event_ease/utils/firebase_util.dart';
+import 'package:event_ease/utils/navigator_util.dart';
 import 'package:event_ease/widgets/custom_miscellaneous_widgets.dart';
 import 'package:event_ease/widgets/custom_padding_widgets.dart';
+import 'package:event_ease/widgets/profile_app_bar_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../utils/navigator_util.dart';
+import '../utils/colors_util.dart';
+import '../utils/firebase_util.dart';
 import '../widgets/custom_styling_widgets.dart';
 
-class FeedBackHistoryScreen extends StatefulWidget {
-  const FeedBackHistoryScreen({super.key});
+class PendingRatingsScreen extends StatefulWidget {
+  const PendingRatingsScreen({super.key});
 
   @override
-  State<FeedBackHistoryScreen> createState() => _FeedBackHistoryScreenState();
+  State<PendingRatingsScreen> createState() => _PendingUserRatingsScreenState();
 }
 
-class _FeedBackHistoryScreenState extends State<FeedBackHistoryScreen> {
-  bool _isLoading = true;
+class _PendingUserRatingsScreenState extends State<PendingRatingsScreen> {
+  bool _isLoading = false;
   bool isClient = false;
-  List<DocumentSnapshot> ownFeedbackDocs = [];
   List<DocumentSnapshot> pendingFeedbackDocs = [];
   List<DocumentSnapshot> associatedUserDocs = [];
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    getFeedbackHistory();
+    getPendingSuppliers();
   }
 
-  void getFeedbackHistory() async {
+  void getPendingSuppliers() async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
     try {
       final userData = await getCurrentUserData();
       isClient = userData['userType'] == 'CLIENT';
-
-      final ownFeedback = await FirebaseFirestore.instance
-          .collection('feedbacks')
-          .where('receiver', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-          .where('rated', isEqualTo: true)
-          .get();
-      ownFeedbackDocs = ownFeedback.docs;
-      ownFeedbackDocs = ownFeedbackDocs.reversed.toList();
-
       final pendingFeedback = await FirebaseFirestore.instance
           .collection('feedbacks')
           .where('rater', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
           .where('rated', isEqualTo: false)
           .get();
       pendingFeedbackDocs = pendingFeedback.docs;
-
-      if (ownFeedbackDocs.isEmpty) {
-        setState(() {
-          _isLoading = false;
-        });
+      if (pendingFeedbackDocs.isEmpty) {
+        navigator.pop();
+        navigator.pushReplacementNamed(NavigatorRoutes.feedbackHistory);
         return;
       }
+
       List<dynamic> userIDs = [];
-      for (var feedback in ownFeedbackDocs) {
+      for (var feedback in pendingFeedbackDocs) {
         final feedbackData = feedback.data() as Map<dynamic, dynamic>;
-        String rater = feedbackData['rater'];
-        userIDs.add(rater);
+        String receiver = feedbackData['receiver'];
+        userIDs.add(receiver);
       }
 
       final users = await FirebaseFirestore.instance
@@ -74,7 +65,7 @@ class _FeedBackHistoryScreenState extends State<FeedBackHistoryScreen> {
       });
     } catch (error) {
       scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Error getting feedback history: $error')));
+          SnackBar(content: Text('Error getting pending suppliers: $error')));
       setState(() {
         _isLoading = false;
       });
@@ -83,72 +74,43 @@ class _FeedBackHistoryScreenState extends State<FeedBackHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.of(context).pop();
-        Navigator.of(context).pushReplacementNamed(isClient
-            ? NavigatorRoutes.clientHome
-            : NavigatorRoutes.supplierHome);
-        return false;
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          actions: [
-            if (pendingFeedbackDocs.isNotEmpty)
-              TextButton(
-                  onPressed: () => Navigator.of(context)
-                      .pushNamed(NavigatorRoutes.pendingRatings),
-                  child: comicNeueText(
-                      label: 'RATE MY\n${isClient ? 'SUPPLIERS' : 'CLIENTS'}',
-                      fontSize: 10,
-                      textAlign: TextAlign.center))
-          ],
-        ),
-        body: switchedLoadingContainer(
-            _isLoading,
-            SafeArea(
-                child: Column(
+    return Scaffold(
+      appBar: emptyWhiteAppBar(context),
+      body: switchedLoadingContainer(
+          _isLoading,
+          SingleChildScrollView(
+            child: Column(
               children: [
-                midnightBGHeaderText(context, label: 'Feedback History'),
-                _feedbackHistoryContainer(),
+                midnightBGHeaderText(context,
+                    label:
+                        'PENDING ${isClient ? 'SUPPLIERS' : 'CLIENTS'} TO RATE',
+                    fontSize: 23),
+                _pendingUsersContainer()
               ],
-            ))),
-      ),
+            ),
+          )),
     );
   }
 
-  Widget _feedbackHistoryContainer() {
+  Widget _pendingUsersContainer() {
     return all20Pix(
-        child: ownFeedbackDocs.isNotEmpty
-            ? SingleChildScrollView(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: ownFeedbackDocs.length,
-                    itemBuilder: (context, index) {
-                      final feedbackData = ownFeedbackDocs[index].data()
-                          as Map<dynamic, dynamic>;
-                      String rater = feedbackData['rater'];
-                      DocumentSnapshot thisUser = associatedUserDocs
-                          .where((user) => user.id == rater)
-                          .first;
-                      return _feedbackEntry(thisUser, ownFeedbackDocs[index]);
-                    }),
-              )
-            : comicNeueText(
-                label: 'NO FEEDBACK AVAILABLE',
-                fontSize: 35,
-                fontWeight: FontWeight.bold,
-                textAlign: TextAlign.center));
+      child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: pendingFeedbackDocs.length,
+          itemBuilder: (context, index) {
+            final feedbackData =
+                pendingFeedbackDocs[index].data() as Map<dynamic, dynamic>;
+            String receiver = feedbackData['receiver'];
+            DocumentSnapshot userDoc =
+                associatedUserDocs.where((user) => user.id == receiver).first;
+            return _currentUser(userDoc, pendingFeedbackDocs[index]);
+          }),
+    );
   }
 
-  Widget _feedbackEntry(
-      DocumentSnapshot userDoc, DocumentSnapshot feedbackDoc) {
+  Widget _currentUser(DocumentSnapshot userDoc, DocumentSnapshot feedbackDoc) {
     final userData = userDoc.data() as Map<dynamic, dynamic>;
     String formattedName = '${userData['firstName']} ${userData['lastName']}';
-    final feedbackData = feedbackDoc.data() as Map<dynamic, dynamic>;
-    double rating = feedbackData['rating'];
-    String feedback = feedbackData['feedback'];
     return vertical10Pix(
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.9,
@@ -184,19 +146,18 @@ class _FeedBackHistoryScreenState extends State<FeedBackHistoryScreen> {
                           color: CustomColors.midnightExtress,
                           fontSize: 23,
                           fontWeight: FontWeight.bold),
-                      staticStarRating(rating: rating),
-                      if (feedback.isNotEmpty)
+                      if (isClient)
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             comicNeueText(
-                                label: 'Feedback: ',
+                                label: 'SERVICE PROVIDED: ',
                                 color: CustomColors.midnightExtress,
                                 fontSize: 17),
                             comicNeueText(
-                                label: feedback,
+                                label: userData['offeredService'],
                                 color: CustomColors.midnightExtress,
-                                fontSize: 14),
+                                fontSize: 17),
                           ],
                         ),
                     ],

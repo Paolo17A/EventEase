@@ -50,7 +50,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                       onPress: () => Navigator.of(context)
                           .pushNamed(NavigatorRoutes.handlePayments),
                       label: 'SERVICE TRANSACTIONS'),
-                  _adminHomeButton(onPress: () {}, label: 'CASH-OUT REQUESTS'),
+                  _adminHomeButton(
+                      onPress: () => Navigator.of(context)
+                          .pushNamed(NavigatorRoutes.handleCashouts),
+                      label: 'CASH-OUT REQUESTS'),
                   _adminHomeButton(
                       onPress: () => Navigator.of(context)
                           .pushNamed(NavigatorRoutes.viewFAQs),

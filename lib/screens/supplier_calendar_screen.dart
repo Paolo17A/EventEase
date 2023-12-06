@@ -52,7 +52,8 @@ class _SupplierCalendarScreenState extends State<SupplierCalendarScreen> {
       eventDocs = eventDocs.where((event) {
         final eventData = event.data() as Map<dynamic, dynamic>;
         bool isCancelled = eventData['isCancelled'];
-        return !isCancelled;
+        bool isFinished = eventData['isFinished'];
+        return !isCancelled && !isFinished;
       }).toList();
 
       List<String> associatedClients = [];
@@ -61,7 +62,12 @@ class _SupplierCalendarScreenState extends State<SupplierCalendarScreen> {
         print(eventData['clientUID']);
         associatedClients.add(eventData['clientUID']);
       }
-
+      if (associatedClients.isEmpty) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
       final clients = await FirebaseFirestore.instance
           .collection('users')
           .where(FieldPath.documentId, whereIn: associatedClients)
