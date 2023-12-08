@@ -24,6 +24,7 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
   bool _isLoading = true;
   List<DocumentSnapshot> pendingCustomers = [];
   List<DocumentSnapshot> eventDocuments = [];
+  List<DocumentSnapshot> feedbackDocs = [];
 
   @override
   void didChangeDependencies() {
@@ -69,6 +70,13 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
           .where(FieldPath.documentId, whereIn: eventIDs)
           .get();
       eventDocuments = events.docs;
+
+      //  Get all Associated Feedbacks
+      final feedbacks = await FirebaseFirestore.instance
+          .collection('feedbacks')
+          .where('receiver', whereIn: serviceRequesters)
+          .get();
+      feedbackDocs = feedbacks.docs;
       setState(() {
         _isLoading = false;
       });
@@ -207,6 +215,21 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
     final eventData = eventDoc.data() as Map<dynamic, dynamic>;
     String eventType = eventData['eventType'];
     DateTime eventDate = (eventData['eventDate'] as Timestamp).toDate();
+    double averageRating = 0;
+    List<DocumentSnapshot> relatedFeedback = feedbackDocs.where((feedback) {
+      final feedbackData = feedback.data() as Map<dynamic, dynamic>;
+      String receiver = feedbackData['receiver'];
+      return receiver == memberDoc.id;
+    }).toList();
+    if (relatedFeedback.isNotEmpty) {
+      double sum = 0;
+      for (var feedback in relatedFeedback) {
+        final feedbackData = feedback.data() as Map<dynamic, dynamic>;
+        double rating = feedbackData['rating'];
+        sum += rating;
+      }
+      averageRating = sum / relatedFeedback.length;
+    }
     return Padding(
       padding: EdgeInsets.all(5),
       child: Container(
@@ -235,6 +258,21 @@ class _CurrentCustomersScreenState extends State<CurrentCustomersScreen> {
                             'Date: ${DateFormat('MMM dd, yyyy').format(eventDate)}',
                         color: Colors.white,
                         fontSize: 20),
+                    if (relatedFeedback.isNotEmpty)
+                      Row(
+                        children: [
+                          staticStarRating(rating: averageRating),
+                          comicNeueText(
+                              label: averageRating.toString(),
+                              color: Colors.white,
+                              fontSize: 18),
+                        ],
+                      )
+                    else
+                      comicNeueText(
+                          label: 'No Ratings Yet',
+                          color: Colors.white,
+                          fontSize: 18),
                     Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [

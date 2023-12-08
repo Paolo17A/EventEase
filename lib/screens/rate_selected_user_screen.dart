@@ -12,11 +12,13 @@ class RateSelectedUserScreen extends StatefulWidget {
   final bool isClient;
   final DocumentSnapshot feedbackDoc;
   final DocumentSnapshot userDoc;
+  final bool isLastToRate;
   const RateSelectedUserScreen(
       {super.key,
       required this.isClient,
       required this.feedbackDoc,
-      required this.userDoc});
+      required this.userDoc,
+      required this.isLastToRate});
 
   @override
   State<RateSelectedUserScreen> createState() => _RateSelectedUserScreenState();
@@ -24,7 +26,7 @@ class RateSelectedUserScreen extends StatefulWidget {
 
 class _RateSelectedUserScreenState extends State<RateSelectedUserScreen> {
   bool _isLoading = false;
-  double givenRating = 0;
+  double givenRating = 5;
   final feedbackController = TextEditingController();
 
   void submitFeedback() async {
@@ -49,7 +51,13 @@ class _RateSelectedUserScreenState extends State<RateSelectedUserScreen> {
       scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Successfully rated this user!')));
       navigator.pop();
-      navigator.pushReplacementNamed(NavigatorRoutes.pendingRatings);
+      if (widget.isLastToRate) {
+        print('LAST TO RATE');
+        navigator.pushReplacementNamed(NavigatorRoutes.feedbackHistory);
+      } else {
+        print('WILL RATE MORE');
+        navigator.pushReplacementNamed(NavigatorRoutes.pendingRatings);
+      }
     } catch (error) {
       scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Error submitting feedback: $error')));

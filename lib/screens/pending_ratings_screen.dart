@@ -117,7 +117,9 @@ class _PendingUserRatingsScreenState extends State<PendingRatingsScreen> {
         height: 120,
         child: ElevatedButton(
             onPressed: () => NavigatorRoutes.rateSelectedUser(context, isClient,
-                feedbackDoc: feedbackDoc, userDoc: userDoc),
+                feedbackDoc: feedbackDoc,
+                userDoc: userDoc,
+                isLastToRate: pendingFeedbackDocs.length == 1),
             style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 side: const BorderSide(

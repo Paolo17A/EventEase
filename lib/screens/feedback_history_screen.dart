@@ -147,63 +147,61 @@ class _FeedBackHistoryScreenState extends State<FeedBackHistoryScreen> {
     final userData = userDoc.data() as Map<dynamic, dynamic>;
     String formattedName = '${userData['firstName']} ${userData['lastName']}';
     final feedbackData = feedbackDoc.data() as Map<dynamic, dynamic>;
-    double rating = feedbackData['rating'];
+    double rating = double.parse(feedbackData['rating'].toString());
     String feedback = feedbackData['feedback'];
     return vertical10Pix(
       child: SizedBox(
         width: MediaQuery.of(context).size.width * 0.9,
         height: 120,
-        child: ElevatedButton(
-            onPressed: () => NavigatorRoutes.rateSelectedUser(context, isClient,
-                feedbackDoc: feedbackDoc, userDoc: userDoc),
-            style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                side: const BorderSide(
-                    color: CustomColors.midnightExtress, width: 2)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.2,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      buildProfileImageWidget(
-                          profileImageURL: userData['profileImageURL']),
-                    ],
-                  ),
+        child: Container(
+          decoration: BoxDecoration(
+              border:
+                  Border.all(color: CustomColors.midnightExtress, width: 2)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: MediaQuery.of(context).size.width * 0.2,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    buildProfileImageWidget(
+                        profileImageURL: userData['profileImageURL']),
+                  ],
                 ),
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.6,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      comicNeueText(
-                          label: formattedName,
-                          color: CustomColors.midnightExtress,
-                          fontSize: 23,
-                          fontWeight: FontWeight.bold),
-                      staticStarRating(rating: rating),
-                      if (feedback.isNotEmpty)
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            comicNeueText(
-                                label: 'Feedback: ',
-                                color: CustomColors.midnightExtress,
-                                fontSize: 17),
-                            comicNeueText(
-                                label: feedback,
-                                color: CustomColors.midnightExtress,
-                                fontSize: 14),
-                          ],
-                        ),
-                    ],
-                  ),
+              ),
+              Container(
+                width: MediaQuery.of(context).size.width * 0.6,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    comicNeueText(
+                        label: formattedName,
+                        color: CustomColors.midnightExtress,
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold),
+                    staticStarRating(rating: double.parse(rating.toString())),
+                    if (feedback.isNotEmpty)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          comicNeueText(
+                              label: 'Feedback: ',
+                              color: CustomColors.midnightExtress,
+                              fontSize: 17),
+                          comicNeueText(
+                              label: feedback,
+                              color: CustomColors.midnightExtress,
+                              fontSize: 14),
+                        ],
+                      ),
+                  ],
                 ),
-              ],
-            )),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -160,9 +160,13 @@ class NavigatorRoutes {
 
   static void rateSelectedUser(BuildContext context, bool isClient,
       {required DocumentSnapshot feedbackDoc,
-      required DocumentSnapshot userDoc}) {
+      required DocumentSnapshot userDoc,
+      required bool isLastToRate}) {
     Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => RateSelectedUserScreen(
-            isClient: isClient, feedbackDoc: feedbackDoc, userDoc: userDoc)));
+            isClient: isClient,
+            feedbackDoc: feedbackDoc,
+            userDoc: userDoc,
+            isLastToRate: isLastToRate)));
   }
 }

@@ -30,8 +30,8 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
   String _introduction = '';
   double _fixedRate = 0.0;
   int _maxCapacity = 0;
-  List<dynamic> feedbackHistory = [];
-
+  List<DocumentSnapshot> feedbackHistory = [];
+  double averageRating = 0;
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -50,13 +50,26 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
       _introduction = userData['introduction'];
       _fixedRate = userData['fixedRate'];
       _maxCapacity = userData['maxCapacity'];
-      feedbackHistory = userData['feedbackHistory'];
+      //feedbackHistory = userData['feedbackHistory'];
+
+      final feedback = await FirebaseFirestore.instance
+          .collection('feedbacks')
+          .where('receiver', isEqualTo: widget.supplierUID)
+          .get();
+      feedbackHistory = feedback.docs;
+      double sum = 0;
+      for (var feedback in feedbackHistory) {
+        final feedbackData = feedback.data() as Map<dynamic, dynamic>;
+        double rating = feedbackData['rating'];
+        sum += rating;
+      }
+      averageRating = sum / feedbackHistory.length;
       setState(() {
         _isLoading = false;
       });
     } catch (error) {
       scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Error getting client data: $error')));
+          SnackBar(content: Text('Error getting supplier data: $error')));
       setState(() {
         _isLoading = false;
       });
@@ -318,12 +331,30 @@ class _SelectedSupplierScreenState extends State<SelectedSupplierScreen> {
   }
 
   Widget _feedback() {
-    return Column(children: [
-      comicNeueText(
-          label: 'Feedback:',
-          color: CustomColors.midnightExtress,
-          fontWeight: FontWeight.bold,
-          fontSize: 18)
-    ]);
+    return Row(
+      children: [
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          comicNeueText(
+              label: 'Rating:',
+              color: CustomColors.midnightExtress,
+              fontWeight: FontWeight.bold,
+              fontSize: 18),
+          feedbackHistory.isNotEmpty
+              ? Row(
+                  children: [
+                    staticStarRating(rating: averageRating),
+                    comicNeueText(
+                        label: averageRating.toString(),
+                        color: CustomColors.midnightExtress,
+                        fontSize: 18),
+                  ],
+                )
+              : comicNeueText(
+                  label: 'No Ratings Yet',
+                  color: CustomColors.midnightExtress,
+                  fontSize: 18)
+        ]),
+      ],
+    );
   }
 }
