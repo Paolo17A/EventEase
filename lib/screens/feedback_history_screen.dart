@@ -157,49 +157,52 @@ class _FeedBackHistoryScreenState extends State<FeedBackHistoryScreen> {
           decoration: BoxDecoration(
               border:
                   Border.all(color: CustomColors.midnightExtress, width: 2)),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                width: MediaQuery.of(context).size.width * 0.2,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    buildProfileImageWidget(
-                        profileImageURL: userData['profileImageURL']),
-                  ],
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.2,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      buildProfileImageWidget(
+                          profileImageURL: userData['profileImageURL']),
+                    ],
+                  ),
                 ),
-              ),
-              Container(
-                width: MediaQuery.of(context).size.width * 0.6,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    comicNeueText(
-                        label: formattedName,
-                        color: CustomColors.midnightExtress,
-                        fontSize: 23,
-                        fontWeight: FontWeight.bold),
-                    staticStarRating(rating: double.parse(rating.toString())),
-                    if (feedback.isNotEmpty)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          comicNeueText(
-                              label: 'Feedback: ',
-                              color: CustomColors.midnightExtress,
-                              fontSize: 17),
-                          comicNeueText(
-                              label: feedback,
-                              color: CustomColors.midnightExtress,
-                              fontSize: 14),
-                        ],
-                      ),
-                  ],
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.6,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      comicNeueText(
+                          label: formattedName,
+                          color: CustomColors.midnightExtress,
+                          fontSize: 23,
+                          fontWeight: FontWeight.bold),
+                      staticStarRating(rating: double.parse(rating.toString())),
+                      if (feedback.isNotEmpty)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            comicNeueText(
+                                label: 'Feedback: ',
+                                color: CustomColors.midnightExtress,
+                                fontSize: 17),
+                            comicNeueText(
+                                label: feedback,
+                                color: CustomColors.midnightExtress,
+                                fontSize: 14),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

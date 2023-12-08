@@ -57,11 +57,13 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       appBar: emptyWhiteAppBar(context),
       body: switchedLoadingContainer(
           _isLoading,
-          Column(
-            children: [
-              midnightBGHeaderText(context, label: 'My Transaction History'),
-              _transactionContainer()
-            ],
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                midnightBGHeaderText(context, label: 'My Transaction History'),
+                _transactionContainer()
+              ],
+            ),
           )),
     );
   }
@@ -69,14 +71,13 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   Widget _transactionContainer() {
     return all20Pix(
         child: clientTransactions.isNotEmpty
-            ? SingleChildScrollView(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: clientTransactions.length,
-                    itemBuilder: (context, index) {
-                      return _transactionEntry(clientTransactions[index]);
-                    }),
-              )
+            ? ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: clientTransactions.length,
+                itemBuilder: (context, index) {
+                  return _transactionEntry(clientTransactions[index]);
+                })
             : comicNeueText(
                 label: 'NO AVAILABLE TRANSACTIONS',
                 fontSize: 35,
