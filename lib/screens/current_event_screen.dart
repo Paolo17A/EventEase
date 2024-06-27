@@ -428,6 +428,112 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
     }
   }
 
+  void cancelThisEvent() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    try {
+      //  Close the alert dialog.
+      navigator.pop();
+      navigator.pop();
+      setState(() {
+        _isLoading = true;
+      });
+      final userData = await getCurrentUserData();
+      String currentEventID = userData['currentEventID'];
+      final eventData = await getThisEvent(currentEventID);
+      String catering = eventData['catering']['supplier'];
+      bool cateringConfirmed = eventData['catering']['confirmed'];
+      String cosmetologist = eventData['cosmetologist']['supplier'];
+      bool cosmetologistConfirmed = eventData['cosmetologist']['confirmed'];
+      String guestPlace = eventData['guestPlace']['supplier'];
+      bool guestPlaceConfirmed = eventData['guestPlace']['confirmed'];
+      String host = eventData['host']['supplier'];
+      bool hostConfirmed = eventData['host']['confirmed'];
+      String photographer = eventData['photographer']['supplier'];
+      bool photographerConfirmed = eventData['photographer']['confirmed'];
+      String technician = eventData['technician']['supplier'];
+      bool technicianConfirmed = eventData['technician']['confirmed'];
+
+      //  1.  Set the event's isCancelled parameter to true
+      await FirebaseFirestore.instance
+          .collection('events')
+          .doc(currentEventID)
+          .update({'isCancelled': true});
+
+      //  2. Set the client's currentEventID parameter to ''
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({'currentEventID': ''});
+
+      //  3. remove the client from all associated supplier's currentClients list
+      if (catering.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(catering)
+            .update({
+          cateringConfirmed ? 'currentClients' : 'serviceRequests':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+      if (cosmetologist.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(cosmetologist)
+            .update({
+          cosmetologistConfirmed ? 'currentClients' : 'serviceRequests':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+      if (guestPlace.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(guestPlace)
+            .update({
+          guestPlaceConfirmed ? 'currentClients' : 'serviceRequests':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+      if (host.isNotEmpty) {
+        await FirebaseFirestore.instance.collection('users').doc(host).update({
+          hostConfirmed ? 'currentClients' : 'serviceRequests':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+      if (photographer.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(photographer)
+            .update({
+          photographerConfirmed ? 'currentClients' : 'serviceRequests':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+      if (technician.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(technician)
+            .update({
+          technicianConfirmed ? 'currentClients' : 'serviceRequests':
+              FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+        });
+      }
+
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Successfully cancelled this event.')));
+      //  return to home screen.
+      navigator.pop();
+      //refresh the home screen
+      navigator.pushReplacementNamed(NavigatorRoutes.clientHome);
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error cancelling this event: $error')));
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -440,7 +546,7 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
               _eventDetailsContainer(),
               Divider(thickness: 2, color: CustomColors.midnightExtress),
               _currentSuppliersContainer(),
-              if (eventDate.difference(DateTime.now()).inDays > 30)
+              if (eventDate.difference(DateTime.now()).inDays > 10)
                 _editEventButton(),
               if (eligibleForPayAllAtOnce()) _settleAllPaymentsButton(),
               if ((!DateTime.now().isBefore(eventDate)) &&
@@ -452,27 +558,73 @@ class _CurrentEventScreenState extends State<CurrentEventScreen> {
   }
 
   Widget _eventDetailsContainer() {
-    return all20Pix(
-      child: Row(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              comicNeueText(
-                  label: 'Event: $eventType',
-                  color: CustomColors.midnightExtress,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 26),
-              Gap(7),
-              comicNeueText(
-                  label:
-                      'Date: ${DateFormat('MMM dd, yyyy').format(eventDate)}',
-                  color: CustomColors.midnightExtress,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 26),
-            ],
-          ),
-        ],
+    return GestureDetector(
+      onLongPress: () {
+        showModalBottomSheet(
+            context: context,
+            constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8),
+            backgroundColor: Colors.transparent,
+            builder: (context) => Wrap(
+                  children: [
+                    ListTile(
+                        tileColor: Colors.white,
+                        shape: RoundedRectangleBorder(),
+                        title: Center(
+                          child: comicNeueText(
+                              label: 'CANCEL EVENT',
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        onTap: () => showDialog(
+                            context: context,
+                            builder: (context) => Dialog(
+                                  child: all20Pix(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        comicNeueText(
+                                            label:
+                                                'Are you sure you wish to cancel this event? All your payments are non-refundable.',
+                                            color: CustomColors.midnightExtress,
+                                            fontWeight: FontWeight.bold),
+                                        all20Pix(
+                                            child: ElevatedButton(
+                                                onPressed: () =>
+                                                    cancelThisEvent(),
+                                                child: comicNeueText(
+                                                    label: 'CANCEL',
+                                                    color: CustomColors
+                                                        .sweetCorn)))
+                                      ],
+                                    ),
+                                  ),
+                                ))),
+                  ],
+                ));
+      },
+      child: all20Pix(
+        child: Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                comicNeueText(
+                    label: 'Event: $eventType',
+                    color: CustomColors.midnightExtress,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 26),
+                Gap(7),
+                comicNeueText(
+                    label:
+                        'Date: ${DateFormat('MMM dd, yyyy').format(eventDate)}',
+                    color: CustomColors.midnightExtress,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 26),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

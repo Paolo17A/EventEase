@@ -54,9 +54,16 @@ class _ChatThreadsScreenState extends State<ChatThreadsScreen> {
       _isClient = userData['userType'] == 'CLIENT';
       if (_isClient) {
         final eventID = userData['currentEventID'];
+        if (eventID.toString().isEmpty) {
+          scaffoldMessenger.showSnackBar(
+              SnackBar(content: Text('You have no current event yet.')));
+          navigator.pop();
+          return;
+        }
         final eventData = await getThisEvent(eventID);
 
-        catering = eventData['catering']['confirmed'] == true
+        catering = eventData['catering']['confirmed'] == true &&
+                eventData['catering']['supplier'].toString().isNotEmpty
             ? await FirebaseFirestore.instance
                 .collection('users')
                 .doc(eventData['catering']['supplier'])
@@ -64,7 +71,8 @@ class _ChatThreadsScreenState extends State<ChatThreadsScreen> {
             : null;
         cateringStatus = eventData['catering']['status'];
 
-        cosmetologist = eventData['cosmetologist']['confirmed'] == true
+        cosmetologist = eventData['cosmetologist']['confirmed'] == true &&
+                eventData['cosmetologist']['supplier'].toString().isNotEmpty
             ? await FirebaseFirestore.instance
                 .collection('users')
                 .doc(eventData['cosmetologist']['supplier'])
@@ -72,7 +80,8 @@ class _ChatThreadsScreenState extends State<ChatThreadsScreen> {
             : null;
         cosmetologistStatus = eventData['cosmetologist']['status'];
 
-        guestPlace = eventData['guestPlace']['confirmed'] == true
+        guestPlace = eventData['guestPlace']['confirmed'] == true &&
+                eventData['guestPlace']['supplier'].toString().isNotEmpty
             ? await FirebaseFirestore.instance
                 .collection('users')
                 .doc(eventData['guestPlace']['supplier'])
@@ -80,7 +89,8 @@ class _ChatThreadsScreenState extends State<ChatThreadsScreen> {
             : null;
         guestPlaceStatus = eventData['guestPlace']['status'];
 
-        host = eventData['host']['confirmed'] == true
+        host = eventData['host']['confirmed'] == true &&
+                eventData['host']['supplier'].toString().isNotEmpty
             ? await FirebaseFirestore.instance
                 .collection('users')
                 .doc(eventData['host']['supplier'])
@@ -88,7 +98,8 @@ class _ChatThreadsScreenState extends State<ChatThreadsScreen> {
             : null;
         hostStatus = eventData['host']['status'];
 
-        photographer = eventData['photographer']['confirmed'] == true
+        photographer = eventData['photographer']['confirmed'] == true &&
+                eventData['photographer']['supplier'].toString().isNotEmpty
             ? await FirebaseFirestore.instance
                 .collection('users')
                 .doc(eventData['photographer']['supplier'])
@@ -96,7 +107,8 @@ class _ChatThreadsScreenState extends State<ChatThreadsScreen> {
             : null;
         photographerStatus = eventData['photographer']['status'];
 
-        technician = eventData['technician']['confirmed'] == true
+        technician = eventData['technician']['confirmed'] == true &&
+                eventData['technician']['supplier'].toString().isNotEmpty
             ? await FirebaseFirestore.instance
                 .collection('users')
                 .doc(eventData['technician']['supplier'])

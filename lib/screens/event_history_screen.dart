@@ -74,11 +74,13 @@ class _EventHistoryScreenState extends State<EventHistoryScreen> {
       appBar: emptyWhiteAppBar(context),
       body: switchedLoadingContainer(
           _isLoading,
-          Column(
-            children: [
-              midnightBGHeaderText(context, label: 'My Event History'),
-              allEventsContainer()
-            ],
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                midnightBGHeaderText(context, label: 'My Event History'),
+                allEventsContainer()
+              ],
+            ),
           )),
     );
   }
@@ -86,13 +88,12 @@ class _EventHistoryScreenState extends State<EventHistoryScreen> {
   Widget allEventsContainer() {
     return all20Pix(
         child: associatedEvents.isNotEmpty
-            ? SingleChildScrollView(
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: associatedEvents.length,
-                    itemBuilder: (context, index) =>
-                        eventEntry(associatedEvents[index])),
-              )
+            ? ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: associatedEvents.length,
+                itemBuilder: (context, index) =>
+                    eventEntry(associatedEvents[index]))
             : comicNeueText(
                 label: 'NO EVENTS AVAILABLE',
                 fontSize: 35,
