@@ -51,9 +51,9 @@ class _ViewAvailableSuppliersScreenState
         });
         return;
       }
-
       //  Iterate through every eligible supplier. A supplier is eligible if they are offering ther desired service
       for (var supplier in eligibleSuppliers) {
+        print('CURRENT SUPPLIER: ${supplier.id}');
         //  Get all of the current eligible supplier's associated clients from their currentClients list and serviceRequests list.
         final supplierData = supplier.data() as Map<dynamic, dynamic>;
 
@@ -65,6 +65,7 @@ class _ViewAvailableSuppliersScreenState
             .collection('transactions')
             .doc(membershipPayment)
             .get();
+
         final transactionData = transaction.data() as Map<dynamic, dynamic>;
         bool verified = transactionData['verified'];
         if (!verified) continue;
@@ -77,7 +78,6 @@ class _ViewAvailableSuppliersScreenState
               .where(FieldPath.documentId, whereIn: currentEvents)
               .get();
           final supplierCurrentEventDocs = events.docs;
-
           //  Iterate through every current event and search for a match.
           bool hasMatchingDate = false;
           for (var event in supplierCurrentEventDocs) {
@@ -98,46 +98,53 @@ class _ViewAvailableSuppliersScreenState
         //  2. Filter the supplier's service requests.
         //  We will only filter the supplier's service requests if there are NO current events that match the current date
         List<dynamic> serviceRequests = supplierData['serviceRequests'];
-
+        print('service requests: $serviceRequests');
         //  The supplier has no service requests, and is therefore available.
         if (serviceRequests.isEmpty) {
           availableSuppliers.add(supplier);
         }
         //  There are existing service requests. We must iterate through each customer's current events to look for a match.
         else {
+          List<dynamic> requestingClients = serviceRequests
+              .map((serviceRequest) => serviceRequest['requestingClient'])
+              .toList();
           final customers = await FirebaseFirestore.instance
               .collection('users')
-              .where(FieldPath.documentId, whereIn: serviceRequests)
+              .where(FieldPath.documentId, whereIn: requestingClients)
               .get();
+          print('Has serbice requests');
 
           //  store all the event IDs in a local list to make the query easier.
           List<dynamic> customerCurrentEventIDs = [];
           final customerDocs = customers.docs;
           for (var customer in customerDocs) {
             final customerData = customer.data();
-            customerCurrentEventIDs.add(customerData['currentEventID']);
+            if (customerData['currentEventID'].toString().isNotEmpty)
+              customerCurrentEventIDs.add(customerData['currentEventID']);
           }
+          if (customerCurrentEventIDs.isNotEmpty) {
+            final customerCurrentEvents = await FirebaseFirestore.instance
+                .collection('events')
+                .where(FieldPath.documentId, whereIn: customerCurrentEventIDs)
+                .get();
+            print('current customer events successfully retrieved');
+            final customerCurrentEventDocs = customerCurrentEvents.docs;
 
-          final customerCurrentEvents = await FirebaseFirestore.instance
-              .collection('events')
-              .where(FieldPath.documentId, whereIn: customerCurrentEventIDs)
-              .get();
-          final customerCurrentEventDocs = customerCurrentEvents.docs;
-
-          //  Iterate through every current event and search for a match.
-          bool hasMatchingDate = false;
-          for (var eventDoc in customerCurrentEventDocs) {
-            final currentEventData = eventDoc.data();
-            DateTime currentEventDate =
-                (currentEventData['eventDate'] as Timestamp).toDate();
-            if (isSameDate(currentEventDate)) {
-              hasMatchingDate = true;
-              break;
+            //  Iterate through every current event and search for a match.
+            bool hasMatchingDate = false;
+            for (var eventDoc in customerCurrentEventDocs) {
+              final currentEventData = eventDoc.data();
+              DateTime currentEventDate =
+                  (currentEventData['eventDate'] as Timestamp).toDate();
+              if (isSameDate(currentEventDate)) {
+                hasMatchingDate = true;
+                break;
+              }
             }
-          }
-          //  There are no matching event dates thus this supplier is available.
-          if (!hasMatchingDate) {
-            availableSuppliers.add(supplier);
+            //  There are no matching event dates thus this supplier is available.
+            if (!hasMatchingDate) {
+              availableSuppliers.add(supplier);
+            }
           }
         }
       } //  End of eligible suppliers for loop.
@@ -170,11 +177,13 @@ class _ViewAvailableSuppliersScreenState
       appBar: emptyWhiteAppBar(context, label: widget.requiredService),
       body: switchedLoadingContainer(
           _isLoading,
-          Column(
-            children: [
-              _availableSuppliersHeader(),
-              _eligibleSuppliersContainer()
-            ],
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                _availableSuppliersHeader(),
+                _eligibleSuppliersContainer()
+              ],
+            ),
           )),
     );
   }
@@ -202,6 +211,7 @@ class _ViewAvailableSuppliersScreenState
             ? SingleChildScrollView(
                 child: GridView.builder(
                     shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisSpacing: 20,
                         mainAxisSpacing: 20,

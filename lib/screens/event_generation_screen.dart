@@ -41,9 +41,9 @@ class _EventGenerationScreenState extends State<EventGenerationScreen> {
                     seedColor: CustomColors.midnightExtress)),
             child: child!));
     if (picked != null && picked != DateTime.now()) {
-      if (picked.difference(DateTime.now()).inDays < 45) {
+      if (picked.difference(DateTime.now()).inDays < 14) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-            content: Text('Event date must be at least 45 days from now.')));
+            content: Text('Event date must be at least 14 days from now.')));
         return;
       }
       setState(() {

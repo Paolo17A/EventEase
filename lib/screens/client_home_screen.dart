@@ -51,7 +51,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       final eventData = await getThisEvent(userData['currentEventID']);
       final eventDate = (eventData['eventDate'] as Timestamp).toDate();
 
-      if (eventDate.difference(DateTime.now()).inDays < 30) {
+      if (eventDate.difference(DateTime.now()).inDays < 10) {
         //  The event will be auto cancelled because the client has no approved suppliers yet.
         if (eventData['catering']['supplier'].toString().isEmpty &&
             eventData['cosmetologist']['supplier'].toString().isEmpty &&
@@ -60,7 +60,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
             eventData['host']['supplier'].toString().isEmpty &&
             eventData['host']['supplier'].toString().isEmpty) {
           await cancelEvent(userData['currentEventID'],
-              'Your event has been auto-cancelled since you have not yet availed any suppliers 30 days before the event.');
+              'Your event has been auto-cancelled since you have not yet availed any suppliers 10 days before the event.');
           setState(() {
             hasCurrentEvent = false;
             _isLoading = false;
